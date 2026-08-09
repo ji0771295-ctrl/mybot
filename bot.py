@@ -1,3 +1,4 @@
+
 import os
 import logging
 import threading
@@ -19,7 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- CONFIGURATION ---
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "0"))
 
 BKASH_NUMBER = "01346133685"
