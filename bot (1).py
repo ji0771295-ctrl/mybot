@@ -1,141 +1,80 @@
-import logging
 import os
+import logging
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from flask import Flask
+from telegram import Update
 from telegram.ext import (
-    ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
+    Application,
+    CommandHandler,
+    ChatJoinRequestHandler,
+    ContextTypes,
 )
 
-# Render Web Service Health Checker
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(b"Bot is live!")
+# Logging Setup
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
-    def log_message(self, format, *args):
-        return
+# --- CONFIGURATION ---
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8952565156:AAHkscHOeRFhwZqlyqYRLvBw7qyKSB-YrC0")
+# আপনার প্রাইভেট চ্যানেলের আইডি (উদাহরণ: -100xxxxxxxxxx)
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002233445566")) 
 
-def run_dummy_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
-    server.serve_forever()
+# --- FLASK WEB SERVER (for UptimeRobot / Render) ---
+app = Flask(__name__)
 
-threading.Thread(target=run_dummy_server, daemon=True).start()
+@app.route('/')
+def home():
+    return "Bot is active and running 24/7!"
 
-# Bot Configuration
-TOKEN = "8952565156:AAHkscHOeRFhwZqlyqYRLvBw7qyKSB-YrC0"
-ADMIN_ID = 8672040646
-CHANNEL_ID = -1004499292164
+def run_web():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
 
-BKASH_NO = "01346133685"
-NAGAD_NO = "01346133685"
-
-logging.basicConfig(level=logging.INFO)
-
-PLANS = {
-    "weekly": {"name": "Weekly Access (7 Days)", "price": 50},
-    "monthly": {"name": "Monthly Access (30 Days)", "price": 150},
-    "quarterly": {"name": "Quarterly Access (90 Days)", "price": 350},
-    "chat": {"name": "Live Chat (30 Days)", "price": 550}
-}
-
+# --- BOT HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("• Weekly — ৳50 (7 days)", callback_data="plan_weekly")],
-        [InlineKeyboardButton("• Monthly — ৳150 (30 days)", callback_data="plan_monthly")],
-        [InlineKeyboardButton("• Quarterly — ৳350 (90 days)", callback_data="plan_quarterly")],
-        [InlineKeyboardButton("• Live Chat — ৳550 (30 days)", callback_data="plan_chat")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
-        "আমাদের প্রাইভেট চ্যানেল ও লাইভ চ্যাটের সাবস্ক্রিপশন নিতে নিচের প্ল্যানগুলো নির্বাচন করুন:",
-        reply_markup=reply_markup
+        "স্বাগতম! চ্যানেল জয়েন রিকোয়েস্ট পাঠালে এই বট স্বয়ংক্রিয়ভাবে তা এক্সেপ্ট করবে।"
     )
 
-async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    request = update.chat_join_request
+    user_id = request.from_user.id
+    chat_id = request.chat.id
 
-    data = query.data
-
-    if data.startswith("plan_"):
-        plan_key = data.split("_")[1]
-        plan = PLANS[plan_key]
-        context.user_data['selected_plan'] = plan_key
-
-        msg = (
-            f"আপনি নির্বাচন করেছেন: {plan['name']}\n"
-            f"মূল্য: ৳{plan['price']}\n\n"
-            f"নিচের নম্বরে সেন্ড মানি (Send Money) করুন:\n"
-            f"📱 Bkash Personal: {BKASH_NO}\n"
-            f"📱 Nagad Personal: {NAGAD_NO}\n\n"
-            f"টাকা পাঠানোর পর বিকাশ/নগদের TrxID বা লাস্ট ৪ ডিজিট লিখে মেসেজ পাঠান।"
+    try:
+        # ১. জয়েন রিকোয়েস্ট এক্সেপ্ট করা
+        await context.bot.approve_chat_join_request(chat_id=chat_id, user_id=user_id)
+        
+        # ২. ওয়ান-টাইম ইনভাইট লিংক তৈরি করা
+        invite_link = await context.bot.create_chat_invite_link(
+            chat_id=chat_id,
+            member_limit=1
         )
-        await query.edit_message_text(msg)
-
-    elif data.startswith("approve_"):
-        target_user_id = int(data.split("_")[1])
-        try:
-            # private channel invite link generate
-            invite_link = await context.bot.create_chat_invite_link(
-                chat_id=CHANNEL_ID,
-                member_limit=1
-            )
-            await context.bot.send_message(
-                chat_id=target_user_id,
-                text=f"✅ আপনার পেমেন্ট ভেরিফাই হয়েছে!\n\nপ্রাইভেট চ্যানেলে যুক্ত হওয়ার লিংক:\n{invite_link.invite_link}"
-            )
-            await query.edit_message_text(f"✅ Approved for User `{target_user_id}`", parse_mode="Markdown")
-        except Exception as e:
-            await query.edit_message_text(f"❌ Error: {e}\n(চ্যানেলে বটকে Admin বানিয়েছেন কি?)")
-
-    elif data.startswith("reject_"):
-        target_user_id = int(data.split("_")[1])
+        
+        # ৩. ইউজারকে প্রাইভেটে মেসেজ দিয়ে লিংক পাঠানো
         await context.bot.send_message(
-            chat_id=target_user_id,
-            text="❌ আপনার পেমেন্ট রিকোয়েস্টটি বাতিল করা হয়েছে। সঠিক TrxID দিয়ে আবার চেষ্টা করুন।"
+            chat_id=user_id,
+            text=f"আপনার জয়েন রিকোয়েস্ট এক্সেপ্ট করা হয়েছে! 🎉\n\nচ্যানেলে প্রবেশ করতে নিচের লিংকে ক্লিক করুন:\n{invite_link.invite_link}"
         )
-        await query.edit_message_text(f"❌ Rejected for User `{target_user_id}`", parse_mode="Markdown")
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = update.message.from_user
-    text = update.message.text
-
-    if update.message.chat.type != 'private':
-        return
-
-    plan_key = context.user_data.get('selected_plan', 'weekly')
-    plan = PLANS.get(plan_key, PLANS['weekly'])
-
-    keyboard = [
-        [
-            InlineKeyboardButton("✅ Approve", callback_data=f"approve_{user.id}"),
-            InlineKeyboardButton("❌ Reject", callback_data=f"reject_{user.id}")
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    admin_msg = (
-        f"📥 New Payment Request!\n\n"
-        f"User: {user.full_name} (@{user.username})\n"
-        f"ID: {user.id}\n"
-        f"Plan: {plan['name']}\n"
-        f"Price: ৳{plan['price']}\n"
-        f"TrxID/Info: {text}"
-    )
-
-    await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, reply_markup=reply_markup)
-    await update.message.reply_text("আপনার পেমেন্ট রিকোয়েস্ট পাঠানো হয়েছে। ভেরিফাই করে দ্রুত অ্যাক্সেস দেওয়া হবে।")
+        logger.info(f"Approved and sent link to user {user_id}")
+    except Exception as e:
+        logger.error(f"Error handling join request: {e}")
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CallbackQueryHandler(button_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
+    # Flask Web Server ব্যাকগ্রাউন্ডে চালু করা
+    threading.Thread(target=run_web, daemon=True).start()
+
+    # Application তৈরি ও স্টার্ট করা
+    application = Application.builder().token(BOT_TOKEN).build()
+
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(ChatJoinRequestHandler(handle_join_request))
+
+    # Bot Polling
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
