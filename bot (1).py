@@ -26,7 +26,7 @@ def run_dummy_server():
 threading.Thread(target=run_dummy_server, daemon=True).start()
 
 # Bot Configuration
-TOKEN = TOKEN = "8952565156:AAF7hsATyy__vnHz76g0_kcOtHj_g-IiciA"
+TOKEN = "8952565156:AAHmumv5kGMj6_KhwU9_kn4EidSIkEkWtOA"
 ADMIN_ID = 8672040646
 CHANNEL_ID = -1004499292164
 
