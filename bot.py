@@ -2,11 +2,12 @@ import os
 import logging
 import threading
 from flask import Flask
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
     ChatJoinRequestHandler,
+    CallbackQueryHandler,
     ContextTypes,
 )
 
@@ -18,63 +19,79 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- CONFIGURATION ---
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8952565156:AAHkscHOeRFhwZqlyqYRLvBw7qyKSB-YrC0")
-# আপনার প্রাইভেট চ্যানেলের আইডি (উদাহরণ: -100xxxxxxxxxx)
-CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "-1002233445566")) 
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "0"))
 
-# --- FLASK WEB SERVER (for UptimeRobot / Render) ---
+BKASH_NUMBER = "01346133685"
+NAGAD_NUMBER = "01346133685"
+
+# Flask web server setup for keep-alive
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot is active and running 24/7!"
+    return "Bot is running perfectly!"
 
-def run_web():
+def run_flask():
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# --- BOT HANDLERS ---
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "স্বাগতম! চ্যানেল জয়েন রিকোয়েস্ট পাঠালে এই বট স্বয়ংক্রিয়ভাবে তা এক্সেপ্ট করবে।"
+# --- TELEGRAM BOT HANDLERS ---
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("• Weekly — ৳50 (7 days)", callback_data='plan_weekly_50')],
+        [InlineKeyboardButton("• Monthly — ৳150 (30 days)", callback_data='plan_monthly_150')],
+        [InlineKeyboardButton("• Quarterly — ৳350 (90 days)", callback_data='plan_quarterly_350')],
+        [InlineKeyboardButton("• Live Chat — ৳550 (30 days)", callback_data='plan_livechat_550')],
+        [InlineKeyboardButton("• ভিডিও কলে মেয়েদের সাথে কথা বলতে চাইলে — ৳550", callback_data='plan_videocall_550')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    text = "আমাদের প্রাইভেট চ্যানেল ও লাইভ চ্যাটের সাবস্ক্রিপশন নিতে নিচের প্ল্যানগুলো নির্বাচন করুন:"
+    await update.message.reply_text(text, reply_markup=reply_markup)
+
+async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    payment_text = (
+        f"যেকোনো প্ল্যান চালু করতে নিচের **bKash** অথবা **Nagad** Personal নম্বরে টাকা সেন্ড মানি (Send Money) করুন:\n\n"
+        f"📱 **bKash Personal:** `{BKASH_NUMBER}`\n"
+        f"📱 **Nagad Personal:** `{NAGAD_NUMBER}`\n\n"
+        f"টাকা পাঠানোর পর আপনার লাস্ট ৪ ডিজিট বা ট্রানজেকশন আইডি (TrxID) আমাদের এডমিনকে মেসেজ দিন।"
     )
+    
+    await query.message.reply_text(payment_text, parse_mode='Markdown')
 
-async def handle_join_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    request = update.chat_join_request
-    user_id = request.from_user.id
-    chat_id = request.chat.id
-
+async def auto_approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        # ১. জয়েন রিকোয়েস্ট এক্সেপ্ট করা
-        await context.bot.approve_chat_join_request(chat_id=chat_id, user_id=user_id)
-        
-        # ২. ওয়ান-টাইম ইনভাইট লিংক তৈরি করা
-        invite_link = await context.bot.create_chat_invite_link(
+        chat_join_request = update.chat_join_request
+        user_id = chat_join_request.from_user.id
+        chat_id = chat_join_request.chat.id
+
+        await context.bot.approve_chat_join_request(
             chat_id=chat_id,
-            member_limit=1
+            user_id=user_id
         )
-        
-        # ৩. ইউজারকে প্রাইভেটে মেসেজ দিয়ে লিংক পাঠানো
-        await context.bot.send_message(
-            chat_id=user_id,
-            text=f"আপনার জয়েন রিকোয়েস্ট এক্সেপ্ট করা হয়েছে! 🎉\n\nচ্যানেলে প্রবেশ করতে নিচের লিংকে ক্লিক করুন:\n{invite_link.invite_link}"
-        )
-        logger.info(f"Approved and sent link to user {user_id}")
+        logger.info(f"Approved join request for user {user_id} in chat {chat_id}")
     except Exception as e:
-        logger.error(f"Error handling join request: {e}")
+        logger.error(f"Error approving request: {e}")
 
 def main():
-    # Flask Web Server ব্যাকগ্রাউন্ডে চালু করা
-    threading.Thread(target=run_web, daemon=True).start()
+    if not BOT_TOKEN:
+        logger.error("No BOT_TOKEN provided!")
+        return
 
-    # Application তৈরি ও স্টার্ট করা
+    threading.Thread(target=run_flask, daemon=True).start()
+
     application = Application.builder().token(BOT_TOKEN).build()
 
-    application.add_handler(CommandHandler("start", start))
-    application.add_handler(ChatJoinRequestHandler(handle_join_request))
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CallbackQueryHandler(button_click))
+    application.add_handler(ChatJoinRequestHandler(auto_approve))
 
-    # Bot Polling
-    application.run_polling(drop_pending_updates=True)
+    logger.info("Bot is polling...")
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
