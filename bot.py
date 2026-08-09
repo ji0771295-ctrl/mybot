@@ -27,11 +27,11 @@ CHANNEL_ID = int(os.environ.get("CHANNEL_ID", "0"))
 BKASH_NUMBER = "01346133685"
 NAGAD_NUMBER = "01346133685"
 
-# এডমিন ইউজারনেম
+# আপনার টেলিগ্রাম ইউজারনেম
 ADMIN_USERNAME = "ji0771295" 
 
-# আপনার প্রাইভেট প্রিমিয়াম চ্যানেলের জয়েন লিংক
-CHANNEL_LINK = "https://t.me/+LC8kof81jN9lODg1"
+# আপনার টেলিগ্রাম Chat ID (আপনার স্ক্রিনশট থেকে নেওয়া)
+ADMIN_CHAT_ID = 8672040646
 
 # Flask web server setup for keep-alive
 app = Flask(__name__)
@@ -77,19 +77,34 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(payment_text, parse_mode='Markdown', reply_markup=reply_markup)
 
 async def text_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
     user_text = update.message.text
+    
+    user_info = f"@{user.username}" if user.username else f"Name: {user.first_name} (ID: `{user.id}`)"
+
+    # ১. কাস্টমারকে উত্তর দেওয়া (লিংক দেওয়া হবে না)
     response_text = (
         f"✅ ধন্যবাদ! আপনার পেমেন্ট তথ্য (`{user_text}`) গ্রহণ করা হয়েছে।\n\n"
-        f"নিচের **'🚀 প্রিমিয়াম চ্যানেলে জয়েন করুন'** বাটনে চাপ দিয়ে এখনই আমাদের প্রাইভেট চ্যানেলে যুক্ত হয়ে যান:"
+        f"এডমিন আপনার পেমেন্ট ভেরিফাই করে খুব দ্রুত আপনাকে প্রিমিয়াম চ্যানেলে যুক্ত করে দেবে।\n"
+        f"তাড়াতাড়ি রেসপন্স পেতে নিচের বাটনে চাপ দিয়ে এডমিনকে মেসেজ দিন।"
     )
-    
     keyboard = [
-        [InlineKeyboardButton("🚀 প্রিমিয়াম চ্যানেলে জয়েন করুন", url=CHANNEL_LINK)],
-        [InlineKeyboardButton("💬 যেকোনো প্রয়োজনে এডমিন", url=f"https://t.me/{ADMIN_USERNAME}")]
+        [InlineKeyboardButton("💬 এডমিনকে মেসেজ দিন", url=f"https://t.me/{ADMIN_USERNAME}")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    
     await update.message.reply_text(response_text, parse_mode='Markdown', reply_markup=reply_markup)
+
+    # ২. আপনার (এডমিনের) টেলিগ্রাম ইনবক্সে নোটিফিকেশন পাঠানো
+    admin_notification = (
+        f"🔔 **নতুন পেমেন্ট মেসেজ এসেছে!**\n\n"
+        f"👤 **কাস্টমার:** {user_info}\n"
+        f"💳 **পেমেন্ট তথ্য / TrxID:** `{user_text}`\n\n"
+        f"👉 বিকাশ/নগদে টাকা চেক করে কাস্টমারকে প্রাইভেট চ্যানেলের লিংক পাঠিয়ে দিন।"
+    )
+    try:
+        await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=admin_notification, parse_mode='Markdown')
+    except Exception as e:
+        logger.error(f"Failed to send admin notification: {e}")
 
 async def auto_approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
