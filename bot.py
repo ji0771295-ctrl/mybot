@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- Flask Web Server (২৪ ঘণ্টা সচল রাখার জন্য) ---
+# --- Flask Web Server ---
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
@@ -29,17 +29,16 @@ BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 STORAGE_CHANNEL_ID = -1004499292164
 WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"
 
-# /start হ্যান্ডলার (ইউজার যখন অ্যাড দেখে ফিরে আসবে)
+# /start হ্যান্ডলার
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # যদি ইউজার কোনো ভিডিও আইডি সহ /start চাপ দিয়ে আসে
     if context.args:
         video_msg_id = context.args[0]
         try:
-            await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি লোড হচ্ছে, দয়া করে ১ সেকেন্ড অপেক্ষা করুন...")
+            await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
             
-            # প্রাইভেট চ্যানেল থেকে হুবহু ফাইলটি ইউজারের ইনবক্সে সেন্ড করা (copy_message)
+            # প্রাইভেট চ্যানেল থেকে হুবহু ফাইলটি ইউজারের ইনবক্সে পাঠানো
             await context.bot.copy_message(
                 chat_id=chat_id,
                 from_chat_id=STORAGE_CHANNEL_ID,
@@ -47,11 +46,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except Exception as e:
             logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা মুছে ফেলা হয়েছে।")
+            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা প্রাইভেট চ্যানেল থেকে মুছে ফেলা হয়েছে।")
     else:
         await update.message.reply_text("স্বাগতম! ভিডিও দেখতে আমাদের চ্যানেলের লিংকে ক্লিক করে ৩টি অ্যাড শেষ করে আসুন।")
 
-# /post কমান্ড (এডমিন যখন চ্যানেলে নতুন পোস্ট বানাবে)
+# /post কমান্ড
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
@@ -59,15 +58,15 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(
                 "❌ **ভুল ফরম্যাট!**\n\n"
                 "সঠিক নিয়ম:\n"
-                "`/post মেসেজ_আইডি | ভিডিও_টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
-                "উদাহরণ:\n`/post 209 | নতুন গরম খবর | https://i.imgur.com/example.jpg`",
+                "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
+                "উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`",
                 parse_mode="Markdown"
             )
             return
 
         parts = [x.strip() for x in raw_text.split("|")]
         if len(parts) < 3:
-            await update.message.reply_text("❌ ৩টি তথ্যই সঠিকভাবে দিন।")
+            await update.message.reply_text("❌ সব তথ্য সঠিকভাবে দিন।")
             return
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
@@ -76,7 +75,6 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         encoded_t = quote(title, safe='')
         encoded_i = quote(img_url, safe='')
 
-        # মিনি অ্যাপ লিঙ্ক
         final_mini_app_url = f"{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&i={encoded_i}"
 
         keyboard = InlineKeyboardMarkup([
