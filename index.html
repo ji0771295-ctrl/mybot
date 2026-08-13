@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Zone Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0f0f0f;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container { width: 100%; max-width: 420px; }
+        .card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a2a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .thumbnail { width: 100%; height: 210px; object-fit: cover; }
+        .info { padding: 15px; }
+        .title { font-size: 16px; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+        .btn-unlock {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(255, 75, 43, 0.4);
+            transition: transform 0.1s ease;
+        }
+        .btn-unlock:active { transform: scale(0.98); }
+        .btn-success { background: linear-gradient(90deg, #11998e, #38ef7d) !important; }
+    </style>
+</head>
+<body>
+
+<div class="container" id="video-container">
+    <!-- ভিডিও লোড হবে -->
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // আপনার ৩টি Adsterra ডাইরেক্ট লিংক
+    const adLinks = [
+        "https://www.effectivecpmnetwork.com/gpszwa2a?key=fdc67f838f031020b45d5500045beb0d",
+        "https://www.effectivecpmnetwork.com/yxqj3v7x?key=5c87c0323ef1b86c120aecb95392d96a",
+        "https://www.effectivecpmnetwork.com/h95nhbcbu?key=d326ecd341b3ed1b724abdf4bafb257c"
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoUrl = urlParams.get('v') || "#";
+    const videoTitle = urlParams.get('t') || "Exclusive Viral Video";
+    const videoImg = urlParams.get('i') || "https://via.placeholder.com/400x210?text=Viral+Video";
+
+    let currentStep = 0;
+
+    const container = document.getElementById('video-container');
+    container.innerHTML = `
+        <div class="card">
+            <img class="thumbnail" src="${videoImg}" alt="Thumbnail">
+            <div class="info">
+                <div class="title">${decodeURIComponent(videoTitle)}</div>
+                <button class="btn-unlock" id="unlockBtn" onclick="processUnlock()">
+                    🔓 UNLOCK (0/3)
+                </button>
+            </div>
+        </div>
+    `;
+
+    function processUnlock() {
+        const btn = document.getElementById('unlockBtn');
+
+        if (currentStep < 3) {
+            window.open(adLinks[currentStep], '_blank');
+            currentStep++;
+
+            if (currentStep < 3) {
+                btn.innerText = `🔓 UNLOCK (${currentStep}/3)`;
+            } else {
+                btn.innerText = "✅ OPEN VIDEO NOW";
+                btn.classList.add("btn-success");
+            }
+        } else {
+            window.location.href = decodeURIComponent(videoUrl);
+        }
+    }
+</script>
+</body>
+</html>
