@@ -28,14 +28,17 @@ def run_flask():
     port = int(os.environ.get("PORT", 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION (আপনার দেয়া তথ্য অনুযায়ী) ---
+BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
+ADMIN_ID = 8672040646
+PREMIUM_CHANNEL_ID = -1004499292164
 WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"  
 
 # /start কমান্ড
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("স্বাগতম! ভিডিও দেখতে চ্যানেলে যুক্ত থাকুন।")
+    await update.message.reply_text("স্বাগতম! ভিডিও দেখতে বা কনটেন্ট আনলক করতে সাথে থাকুন।")
 
-# /post কমান্ড - ভিডিও বাটন তৈরি করার জন্য
+# /post কমান্ড - নতুন ভিডিও পোস্ট তৈরি করার জন্য
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
@@ -73,22 +76,20 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         logger.error(f"Error in create_post: {e}")
-        await update.message.reply_text("একটি সমস্যা হয়েছে। ফরম্যাটটি চেক করুন।")
+        await update.message.reply_text("একটি সমস্যা হয়েছে। পোস্টের ফরম্যাটটি চেক করুন।")
 
 def main():
+    # Flask ওয়েব সার্ভার ব্যাকগ্রাউন্ডে চালু করা
     threading.Thread(target=run_flask, daemon=True).start()
 
-    BOT_TOKEN = os.environ.get("BOT_TOKEN")
-    if not BOT_TOKEN:
-        logger.error("BOT_TOKEN missing!")
-        return
-
+    # Bot Application তৈরি
     app = Application.builder().token(BOT_TOKEN).build()
 
+    # Command Handlers
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("post", create_post))
 
-    logger.info("Bot is running...")
+    logger.info("Bot is running 24/7...")
     app.run_polling()
 
 if __name__ == '__main__':
