@@ -3,7 +3,7 @@ import logging
 import threading
 from urllib.parse import quote
 from flask import Flask
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Logging Setup
@@ -29,29 +29,30 @@ BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 STORAGE_CHANNEL_ID = -1004499292164
 WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"
 MAIN_CHANNEL_USERNAME = "@MYxxxxx9"  # আপনার পাবলিক চ্যানেল
+BOT_USERNAME = "MySongPremium2026Bot"  # আপনার বটের ইউজারনেম
 
 # /start হ্যান্ডলার
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
     if context.args:
-        video_msg_id = context.args[0]
-        try:
-            await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
-            
-            # প্রাইভেট চ্যানেল থেকে হুবহু ফাইলটি ইউজারের ইনবক্সে পাঠানো
-            await context.bot.copy_message(
-                chat_id=chat_id,
-                from_chat_id=STORAGE_CHANNEL_ID,
-                message_id=int(video_msg_id)
-            )
-        except Exception as e:
-            logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা প্রাইভেট চ্যানেল থেকে মুছে ফেলা হয়েছে।")
+        video_id = context.args[0]
+        
+        # ইউজারের জন্য ১-ক্লিকে মিনি অ্যাপ ওপেন করার বাটন (পপ-আপ ছাড়া)
+        final_mini_app_url = f"{WEB_APP_URL}?v={video_id}"
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🎬 এখনই ভিডিও দেখুন (Play Video)", web_app=WebAppInfo(url=final_mini_app_url))]
+        ])
+        
+        await update.message.reply_text(
+            "👇 **ভিডিওটি প্লে করতে নিচের বাটনে চাপ দিন:**",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
     else:
-        await update.message.reply_text("স্বাগতম! ভিডিও দেখতে আমাদের চ্যানেলের লিংকে ক্লিক করে ৩টি অ্যাড শেষ করে আসুন।")
+        await update.message.reply_text("স্বাগতম! ভিডিও দেখতে চ্যানেলের পোস্টে থাকা লিংকে ক্লিক করুন।")
 
-# /post কমান্ড (সরাসরি পাবলিক চ্যানেলে বাটনসহ পোস্ট যাবে)
+# /post কমান্ড (পাবলিক চ্যানেলে t.me বটের লিংক পাঠাবে)
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
@@ -59,8 +60,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(
                 "❌ **ভুল ফরম্যাট!**\n\n"
                 "সঠিক নিয়ম:\n"
-                "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
-                "উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`",
+                "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`",
                 parse_mode="Markdown"
             )
             return
@@ -72,33 +72,29 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
 
-        encoded_v = quote(msg_id, safe='')
-        encoded_t = quote(title, safe='')
-        encoded_i = quote(img_url, safe='')
+        # চ্যানেলে পপ-আপ না আসার জন্য বটের t.me লিংক ব্যবহার করা হয়েছে
+        bot_deep_link = f"https://t.me/{BOT_USERNAME}?start={msg_id}"
 
-        final_mini_app_url = f"{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&i={encoded_i}"
-
-        # চ্যানেলে লিংক সঠিকভাবে কাজ করার জন্য URL button ব্যবহার করা হয়েছে
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔥 Play Video 🔥", url=final_mini_app_url)]
+            [InlineKeyboardButton("🔥 Play Video 🔥", url=bot_deep_link)]
         ])
 
-        # সরাসরি পাবলিক চ্যানেল @MYxxxxx9 এ ছবি ও বাটন পাঠানো
+        # সরাসরি পাবলিক চ্যানেলে পোস্ট পাঠানো
         await context.bot.send_photo(
             chat_id=MAIN_CHANNEL_USERNAME,
             photo=img_url,
-            caption=f"🎬 **{title}**\n\nনিচের বাটনে ক্লিক করে পুরো ভিডিওটি দেখুন:",
+            caption=f"🎬 **{title}**\n\nনিচের বাটনে ক্লিক করে ভিডিওটি দেখুন:",
             reply_markup=keyboard,
             parse_mode="Markdown"
         )
 
         await update.message.reply_text(
-            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে বাটনসহ পোস্ট করা হয়েছে!",
+            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পপ-আপ মুক্ত বাটনসহ পোস্ট করা হয়েছে!",
             parse_mode="Markdown"
         )
     except Exception as e:
         logger.error(f"Error in create_post: {e}")
-        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
+        await update.message.reply_text(f"❌ সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
 
 def main():
     threading.Thread(target=run_flask, daemon=True).start()
