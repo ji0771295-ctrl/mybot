@@ -3,7 +3,7 @@ import logging
 import threading
 from urllib.parse import quote
 from flask import Flask
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Logging Setup
@@ -28,6 +28,7 @@ def run_flask():
 BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 STORAGE_CHANNEL_ID = -1004499292164
 WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"
+MAIN_CHANNEL_USERNAME = "@MYxxxxx9"  # আপনার পাবলিক চ্যানেল
 
 # /start হ্যান্ডলার
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -46,18 +47,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except Exception as e:
             logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা প্রাইভেট চ্যানেল থেকে মুছে ফেলা হয়েছে।")
+            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা প্রাইভেট চ্যানেল থেকে মুছে ফেলা হয়েছে।")
     else:
         await update.message.reply_text("স্বাগতম! ভিডিও দেখতে আমাদের চ্যানেলের লিংকে ক্লিক করে ৩টি অ্যাড শেষ করে আসুন।")
 
-# /post কমান্ড
+# /post কমান্ড (সরাসরি পাবলিক চ্যানেলে বাটনসহ পোস্ট যাবে)
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
         if not raw_text or "|" not in raw_text:
             await update.message.reply_text(
                 "❌ **ভুল ফরম্যাট!**\n\n"
-                "সঠিক নিয়ম:\n"
+                "সঠিক নিয়ম:\n"
                 "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
                 "উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`",
                 parse_mode="Markdown"
@@ -77,19 +78,27 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         final_mini_app_url = f"{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&i={encoded_i}"
 
+        # চ্যানেলে লিংক সঠিকভাবে কাজ করার জন্য URL button ব্যবহার করা হয়েছে
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔥 Play Video 🔥", web_app=WebAppInfo(url=final_mini_app_url))]
+            [InlineKeyboardButton("🔥 Play Video 🔥", url=final_mini_app_url)]
         ])
 
-        await update.message.reply_photo(
+        # সরাসরি পাবলিক চ্যানেল @MYxxxxx9 এ ছবি ও বাটন পাঠানো
+        await context.bot.send_photo(
+            chat_id=MAIN_CHANNEL_USERNAME,
             photo=img_url,
             caption=f"🎬 **{title}**\n\nনিচের বাটনে ক্লিক করে পুরো ভিডিওটি দেখুন:",
             reply_markup=keyboard,
             parse_mode="Markdown"
         )
+
+        await update.message.reply_text(
+            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে বাটনসহ পোস্ট করা হয়েছে!",
+            parse_mode="Markdown"
+        )
     except Exception as e:
         logger.error(f"Error in create_post: {e}")
-        await update.message.reply_text("❌ পোস্ট তৈরি করতে সমস্যা হয়েছে। ইনপুট চেক করুন।")
+        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
 
 def main():
     threading.Thread(target=run_flask, daemon=True).start()
