@@ -5,38 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Song Premium - Mini App</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 12px; }
-        .container { width: 100%; max-width: 420px; background: #ffffff; border-radius: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); padding: 16px; }
-        .header { text-align: center; padding: 10px 0; border-bottom: 2px dashed #eee; margin-bottom: 15px; }
-        .header h1 { color: #7c3aed; font-size: 22px; font-weight: 800; }
-        .header p { color: #6b7280; font-size: 12px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f6f9; padding-bottom: 75px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 420px; background: #ffffff; min-height: 100vh; padding: 15px; position: relative; }
         
-        .song-banner { background: linear-gradient(135deg, #a7f3d0 0%, #059669 100%); color: #064e3b; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .song-banner p { font-size: 13px; font-weight: 600; }
-        .song-btn { background: #ffffff; color: #059669; padding: 6px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
+        /* Header */
+        .header { text-align: center; padding: 10px 0; border-bottom: 2px dashed #e2e8f0; margin-bottom: 12px; }
+        .header h1 { color: #6d28d9; font-size: 22px; font-weight: 800; }
+        .header p { color: #64748b; font-size: 12px; }
+
+        /* Song Play Banner */
+        .song-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .song-btn { background: #ffffff; color: #059669; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
+
+        /* Video Box */
+        .video-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .video-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
+        .thumbnail-box { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; background: #cbd5e1; position: relative; margin-bottom: 10px; }
+        .thumbnail-box img { width: 100%; height: 100%; object-fit: cover; }
         
-        .video-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 15px; }
-        .video-title { font-size: 15px; font-weight: 700; color: #1f2937; margin-bottom: 10px; }
-        .thumbnail-container { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; background: #e5e7eb; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; }
-        .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; }
-        .instruction { font-size: 12px; color: #4b5563; margin-bottom: 15px; line-height: 1.4; }
-        
-        .action-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; }
-        .btn-unlock { background: #7c3aed; color: #ffffff; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
-        .btn-ready { background: #10b981; color: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
-        .timer-text { font-size: 13px; color: #ef4444; font-weight: 700; margin-top: 8px; text-align: center; min-height: 18px; }
+        .like-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65); color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600; backdrop-filter: blur(4px); }
+        .like-btn.liked { color: #ef4444; background: rgba(255, 255, 255, 0.9); }
+
+        /* Highlighted Notice Box */
+        .notice-box { background: #fffbebf8; border: 2px solid #f59e0b; border-left: 6px solid #dc2626; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; }
+        .notice-title { color: #dc2626; font-size: 15px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .notice-desc { color: #78350f; font-size: 13px; font-weight: 700; line-height: 1.5; }
+        .notice-desc span { color: #d97706; font-weight: 800; }
+
+        /* Unlock Main Button */
+        .action-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: block; text-align: center; }
+        .btn-unlock { background: #7c3aed; color: #ffffff; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); }
+        .btn-ready { background: #10b981; color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+        .timer-status { font-size: 13px; font-weight: 700; margin-top: 8px; text-align: center; min-height: 20px; }
+
+        /* Bottom Navigation Bar */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 10px 0 6px 0; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); z-index: 90; }
+        .nav-button { display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 12px; font-weight: 700; cursor: pointer; background: none; border: none; flex: 1; }
+        .nav-button.active { color: #7c3aed; }
+        .nav-button .icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* Pop-up Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(2px); }
+        .modal-card { background: #ffffff; padding: 20px; border-radius: 18px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-card h3 { color: #6d28d9; margin-bottom: 12px; font-size: 18px; }
+        .modal-card p { font-size: 13px; color: #334155; margin-bottom: 15px; line-height: 1.6; text-align: left; }
+        .modal-card input { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; }
+        .close-btn { background: #ef4444; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Header -->
     <div class="header">
         <h1>My Song Premium 🎵</h1>
         <p>@MySongPremium2026Bot</p>
     </div>
 
-    <!-- Optional Song Banner -->
+    <!-- Song Banner -->
     <div class="song-banner">
         <p>🎵 গানটি শুনুন (অপশনাল)</p>
         <a href="https://youtu.be/lKCEIXIlohg?si=hBFmGi8tFPuPwq-I" target="_blank" class="song-btn">Play Song</a>
@@ -44,90 +71,272 @@
 
     <!-- Video Card -->
     <div class="video-card">
-        <div id="videoTitle" class="video-title">এক্সক্লুসিভ ভিডিও লোড হচ্ছে...</div>
-        <div class="thumbnail-container">
-            <img id="videoThumb" src="https://via.placeholder.com/400x200?text=Loading..." alt="Thumbnail">
+        <div id="videoTitle" class="video-title">নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵</div>
+        <div class="thumbnail-box">
+            <img id="videoThumb" src="https://via.placeholder.com/400x200?text=Loading+Thumbnail..." alt="Thumbnail">
+            <button id="likeBtn" class="like-btn" onclick="toggleLike()">❤️ <span id="likeText">পছন্দ</span></button>
         </div>
-        <p class="instruction">ভিডিও পেতে UNLOCK বাটনে ক্লিক করুন এবং অ্যাড পেজে <b>১০ সেকেন্ড</b> থাকুন।</p>
     </div>
 
+    <!-- Highlighted Eye-Catching Notice -->
+    <div class="notice-box">
+        <div class="notice-title">⚠️ ভিডিও পেতে নিচের নির্দেশনা শুনুন:</div>
+        <div class="notice-desc">
+            ১. <span>UNLOCK (1/3)</span> বাটনে চাপ দিন।<br>
+            ২. এড ওপেন হলে সেখানে কমপক্ষে <span>১০ সেকেন্ড</span> থাকুন।<br>
+            ৩. ১০ সেকেন্ড পর ফেরত এলে পরবর্তী ধাপ আনলক হবে!
+        </div>
+    </div>
+
+    <!-- Main Unlock Button -->
     <button id="mainBtn" class="action-btn btn-unlock" onclick="handleUnlock()">
         🔒 UNLOCK (1/3)
     </button>
-    <div id="timerDisplay" class="timer-text"></div>
+    <div id="timerDisplay" class="timer-status"></div>
+</div>
+
+<!-- Bottom Navigation Bar -->
+<div class="bottom-nav">
+    <button class="nav-button" onclick="openHome()">
+        <span class="icon">🏠</span>
+        <span>হোম</span>
+    </button>
+    <button class="nav-button" onclick="openFavorites()">
+        <span class="icon">❤️</span>
+        <span>পছন্দ</span>
+    </button>
+    <button class="nav-button" onclick="handleProfileClick()">
+        <span class="icon">👤</span>
+        <span>প্রোফাইল</span>
+    </button>
+    <button class="nav-button active" onclick="openGuide()">
+        <span class="icon">▶️</span>
+        <span>গাইড</span>
+    </button>
+</div>
+
+<!-- Guide Modal -->
+<div id="guideModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>📖 ইউজার গাইড ও শেয়ার</h3>
+        <p><b>১. ভিডিও দেখতে:</b> আনলক বাটনে ক্লিক করে এডের পেজে ১০ সেকেন্ড সময় কাটান। ৩টি ধাপ পূরণ হলেই ভিডিও ইনবক্সে পাবেন।<br><br>
+        <b>২. চ্যানেল শেয়ার:</b> বন্ধুদের গান উপহার দিতে চ্যানেলটি শেয়ার করুন।</p>
+        <button class="action-btn btn-ready" style="margin-bottom: 10px;" onclick="shareChannel()">🔗 পাবলিক চ্যানেল শেয়ার করুন</button>
+        <button class="close-btn" onclick="closeModal('guideModal')">বন্ধ করুন</button>
+    </div>
+</div>
+
+<!-- Favorite Modal -->
+<div id="favModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>❤️ আপনার পছন্দের ভিডিও</h3>
+        <p id="favStatusText">আপনার লাইক করা ভিডিও তালিকা নিচে দেখা যাবে।</p>
+        <button class="close-btn" onclick="closeModal('favModal')">বন্ধ করুন</button>
+    </div>
+</div>
+
+<!-- Admin Link Management Panel -->
+<div id="adminModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>⚙️ এডমিন প্যানেল (এডের লিংক পরিবর্তন)</h3>
+        <p style="margin-bottom: 8px;">এখানে আপনার নতুন ৩টি এডভারটাইজমেন্ট লিংক বসান:</p>
+        <input type="text" id="ad1" placeholder="Ad Link 1">
+        <input type="text" id="ad2" placeholder="Ad Link 2">
+        <input type="text" id="ad3" placeholder="Ad Link 3">
+        <button class="action-btn btn-ready" style="margin: 10px 0;" onclick="saveAdLinks()">সেভ করুন</button>
+        <button class="close-btn" onclick="closeModal('adminModal')">বাতিল</button>
+    </div>
 </div>
 
 <script>
+    const PUBLIC_CHANNEL_URL = "https://t.me/MYxxxxx9"; // 👈 আপনার মূল পাবলিক চ্যানেলের লিংক
+    const BOT_USERNAME = "MySongPremium2026Bot";       // 👈 আপনার বটের ইউজারনেম
+
+    // Parse URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const videoId = urlParams.get('v') || '';
-    const title = urlParams.get('t') ? decodeURIComponent(urlParams.get('t')) : 'এক্সক্লুসিভ ভিডিও';
+    const videoId = urlParams.get('v') || 'default_vid';
+    const title = urlParams.get('t') ? decodeURIComponent(urlParams.get('t')) : 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵';
     const thumb = urlParams.get('i') ? decodeURIComponent(urlParams.get('i')) : '';
 
     document.getElementById('videoTitle').innerText = title;
     if (thumb) document.getElementById('videoThumb').src = thumb;
+
+    // Load Default or Admin-saved Ad Links
+    let defaultAds = [
+        "https://www.effectivecpmnetwork.com/gpszwa2a?key=fdc67f838f031020b45d5500045beb0d",
+        "https://www.effectivecpmnetwork.com/yxqj3v7x?key=5c87c0323ef1b86c120aecb95392d96a",
+        "https://www.effectivecpmnetwork.com/h95nhbcbu?key=d326ecd341b3ed1b724abdf4bafb257c"
+    ];
+    let savedAds = JSON.parse(localStorage.getItem('admin_ad_links'));
+    let AD_LINKS = savedAds || defaultAds;
 
     let currentStep = 1;
     const totalSteps = 3;
     let adOpenTime = 0;
     let isWaitingForReturn = false;
 
-    const AD_LINKS = [
-        "https://www.effectivecpmnetwork.com/gpszwa2a?key=fdc67f838f031020b45d5500045beb0d",
-        "https://www.effectivecpmnetwork.com/yxqj3v7x?key=5c87c0323ef1b86c120aecb95392d96a",
-        "https://www.effectivecpmnetwork.com/h95nhbcbu?key=d326ecd341b3ed1b724abdf4bafb257c"
-    ];
+    // 24 Hours Unlock System
+    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+    const savedUnlockTime = localStorage.getItem('unlocked_time_' + videoId);
 
+    if (savedUnlockTime && (Date.now() - parseInt(savedUnlockTime)) < TWENTY_FOUR_HOURS) {
+        showUnlockedButton();
+    }
+
+    function showUnlockedButton() {
+        const btn = document.getElementById('mainBtn');
+        btn.className = "action-btn btn-ready";
+        btn.innerText = "🎬 ভিডিও পেতে এখানে ক্লিক করুন (Telegram)";
+        btn.onclick = redirectToTelegram;
+        document.getElementById('timerDisplay').style.color = "#059669";
+        document.getElementById('timerDisplay').innerText = `🎉 ভিডিওটি আপনার জন্য ২৪ ঘণ্টার জন্য আনলক রয়েছে!`;
+    }
+
+    // Handle Unlock Click
     function handleUnlock() {
         if (currentStep <= totalSteps) {
-            adOpenTime = Date.now(); // অ্যাড খোলার সময় রেকর্ড
+            adOpenTime = Date.now();
             isWaitingForReturn = true;
-            
-            // নতুন ট্যাবে অ্যাড ওপেন
             window.open(AD_LINKS[currentStep - 1], '_blank');
             
             document.getElementById('timerDisplay').style.color = "#2563eb";
-            document.getElementById('timerDisplay').innerText = "⏳ এডের পেজে অন্তত ১০ সেকেন্ড সময় কাটান, তারপর এখানে ফিরুন...";
+            document.getElementById('timerDisplay').innerText = "⏳ এডের পেজে অন্তত ১০ সেকেন্ড অপেক্ষা করুন...";
         }
     }
 
-    // ইউজার মিনি অ্যাপে ফিরে আসলে ১০ সেকেন্ড হিসাব করা
+    // Detect User Return & Check 10 Seconds Condition
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden && isWaitingForReturn) {
             const timeSpent = Math.floor((Date.now() - adOpenTime) / 1000);
 
             if (timeSpent < 10) {
-                // ১০ সেকেন্ডের কম সময় থাকলে রিজেক্ট করবে
                 const required = 10 - timeSpent;
-                alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড এডে ছিলেন!\nভিডিও আনলক করতে আরও ${required} সেকেন্ড এডের পেজে থাকতে হবে।`);
-                document.getElementById('timerDisplay').style.color = "#ef4444";
-                document.getElementById('timerDisplay').innerText = `❌ আপনি ১০ সেকেন্ড পূরণ করেননি! আবার চেষ্টা করুন।`;
+                alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড এডে ছিলেন!\nভিডিও পেতে আপনাকে পুরো ১০ সেকেন্ড এডের পেজে থাকতে হবে। আর মাত্র ${required} সেকেন্ড থাকুন।`);
+                document.getElementById('timerDisplay').style.color = "#dc2626";
+                document.getElementById('timerDisplay').innerText = `❌ ১০ সেকেন্ড পূরণ হয়নি! (দেখেছেন ${timeSpent} সেকেন্ড)`;
             } else {
-                // ১০ সেকেন্ড বা তার বেশি থাকলে আনলক সফল
                 isWaitingForReturn = false;
                 currentStep++;
 
                 if (currentStep <= totalSteps) {
                     document.getElementById('mainBtn').innerText = `🔒 UNLOCK (${currentStep}/${totalSteps})`;
                     document.getElementById('timerDisplay').style.color = "#059669";
-                    document.getElementById('timerDisplay').innerText = `✅ অ্যাড ${currentStep - 1} সফল! পরের ধাপে ক্লিক করুন।`;
+                    document.getElementById('timerDisplay').innerText = `✅ ধাপ ${currentStep - 1} সফলভাবে শেষ হয়েছে!`;
                 } else {
-                    const btn = document.getElementById('mainBtn');
-                    btn.className = "action-btn btn-ready";
-                    btn.innerText = "🎬 ভিডিও পেতে এখানে ক্লিক করুন (Telegram)";
-                    btn.onclick = redirectToTelegram;
-                    document.getElementById('timerDisplay').style.color = "#059669";
-                    document.getElementById('timerDisplay').innerText = `🎉 ৩টি ধাপ সম্পন্ন হয়েছে!`;
+                    localStorage.setItem('unlocked_time_' + videoId, Date.now().toString());
+                    showUnlockedButton();
                 }
             }
         }
     });
 
+    // Redirect to Telegram Bot
     function redirectToTelegram() {
         if (!videoId) {
             alert("ভিডিও আইডি পাওয়া যায়নি!");
             return;
         }
-        window.location.href = `https://t.me/MySongPremium2026Bot?start=${videoId}`;
+        window.location.href = `https://t.me/${BOT_USERNAME}?start=${videoId}`;
+    }
+
+    // Nav Bar Actions
+    function openHome() {
+        window.location.href = PUBLIC_CHANNEL_URL;
+    }
+
+    function openGuide() {
+        document.getElementById('guideModal').style.display = 'flex';
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    // Profile Click (1 click Reload / 3 clicks Secret Admin)
+    let profileClickCount = 0;
+    let clickTimer;
+    function handleProfileClick() {
+        profileClickCount++;
+        if (profileClickCount === 1) {
+            clickTimer = setTimeout(() => {
+                profileClickCount = 0;
+                window.location.reload();
+            }, 800);
+        } else if (profileClickCount === 3) {
+            clearTimeout(clickTimer);
+            profileClickCount = 0;
+            openAdminPanel();
+        }
+    }
+
+    // Admin Panel Logic
+    function openAdminPanel() {
+        let pass = prompt("🔑 এডমিন প্যানেল পাসওয়ার্ড লিখুন:");
+        if (pass === "1234") {
+            document.getElementById('ad1').value = AD_LINKS[0] || '';
+            document.getElementById('ad2').value = AD_LINKS[1] || '';
+            document.getElementById('ad3').value = AD_LINKS[2] || '';
+            document.getElementById('adminModal').style.display = 'flex';
+        } else if (pass !== null) {
+            alert("❌ ভুল পাসওয়ার্ড!");
+        }
+    }
+
+    function saveAdLinks() {
+        let a1 = document.getElementById('ad1').value.trim();
+        let a2 = document.getElementById('ad2').value.trim();
+        let a3 = document.getElementById('ad3').value.trim();
+
+        if (a1 && a2 && a3) {
+            AD_LINKS = [a1, a2, a3];
+            localStorage.setItem('admin_ad_links', JSON.stringify(AD_LINKS));
+            alert("✅ এডের ৩টি লিংক সফলভাবে পরিবর্তিত ও সেভ হয়েছে!");
+            closeModal('adminModal');
+        } else {
+            alert("⚠️ অনুগ্রহ করে ৩টি এডের লিংকই সঠিকভাবে পূরণ করুন।");
+        }
+    }
+
+    // Like System
+    function toggleLike() {
+        let isLiked = localStorage.getItem('liked_' + videoId);
+        const likeBtn = document.getElementById('likeBtn');
+        const likeText = document.getElementById('likeText');
+
+        if (isLiked) {
+            localStorage.removeItem('liked_' + videoId);
+            likeBtn.classList.remove('liked');
+            likeText.innerText = "পছন্দ";
+            alert("পছন্দ তালিকা থেকে সরানো হয়েছে।");
+        } else {
+            localStorage.setItem('liked_' + videoId, title);
+            likeBtn.classList.add('liked');
+            likeText.innerText = "পছন্দ হয়েছে";
+            alert("❤️ ভিডিওটি আপনার পছন্দ তালিকায় সেভ করা হয়েছে!");
+        }
+    }
+
+    function openFavorites() {
+        let favText = "";
+        let hasFavs = false;
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith('liked_')) {
+                hasFavs = true;
+                favText += "• " + localStorage.getItem(key) + "<br>";
+            }
+        }
+        if (hasFavs) {
+            document.getElementById('favStatusText').innerHTML = "<b>আপনার সংরক্ষিত ভিডিওসমূহ:</b><br><br>" + favText;
+        } else {
+            document.getElementById('favStatusText').innerHTML = "আপনার কোনো ভিডিও পছন্দ তালিকায় সংরক্ষিত নেই।";
+        }
+        document.getElementById('favModal').style.display = 'flex';
+    }
+
+    function shareChannel() {
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(PUBLIC_CHANNEL_URL)}&text=${encodeURIComponent('সেরা মিউজিক ভিডিও দেখতে আমাদের চ্যানেলে জয়েন করুন!')}`;
+        window.open(shareUrl, '_blank');
     }
 </script>
 
