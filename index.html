@@ -18,6 +18,9 @@
         .song-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .song-btn { background: #ffffff; color: #059669; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
 
+        /* Fake Public View Count Badge */
+        .public-view-badge { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #ffffff; padding: 8px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; }
+
         /* Video Box */
         .video-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
         .video-title { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
@@ -33,10 +36,11 @@
         .notice-desc { color: #78350f; font-size: 13px; font-weight: 700; line-height: 1.5; }
         .notice-desc span { color: #d97706; font-weight: 800; }
 
-        /* Unlock Main Button */
+        /* Action Buttons */
         .action-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: block; text-align: center; }
         .btn-unlock { background: #7c3aed; color: #ffffff; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); }
         .btn-ready { background: #10b981; color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+        .btn-feedback { background: #0284c7; color: #ffffff; margin-top: 10px; padding: 10px; font-size: 14px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; width: 100%; }
         .timer-status { font-size: 13px; font-weight: 700; margin-top: 8px; text-align: center; min-height: 20px; }
 
         /* Bottom Navigation Bar */
@@ -50,8 +54,11 @@
         .modal-card { background: #ffffff; padding: 20px; border-radius: 18px; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-card h3 { color: #6d28d9; margin-bottom: 12px; font-size: 18px; }
         .modal-card p { font-size: 13px; color: #334155; margin-bottom: 15px; line-height: 1.6; text-align: left; }
-        .modal-card input { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; }
+        .modal-card input, .modal-card textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-family: inherit; }
         .close-btn { background: #ef4444; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 5px; }
+
+        .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; margin-bottom: 12px; text-align: left; }
+        .stat-line { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #334155; margin: 4px 0; }
     </style>
 </head>
 <body>
@@ -69,6 +76,11 @@
         <a href="https://youtu.be/lKCEIXIlohg?si=hBFmGi8tFPuPwq-I" target="_blank" class="song-btn">Play Song</a>
     </div>
 
+    <!-- Public View Count Banner (Shows high number to users) -->
+    <div class="public-view-badge">
+        🔥 আজ <span id="publicViewsDisplay">24,520</span>+ জন ভিডিওটি দেখেছেন!
+    </div>
+
     <!-- Video Card -->
     <div class="video-card">
         <div id="videoTitle" class="video-title">নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵</div>
@@ -78,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Highlighted Eye-Catching Notice -->
+    <!-- Highlighted Notice Box -->
     <div class="notice-box">
         <div class="notice-title">⚠️ ভিডিও পেতে নিচের নির্দেশনা শুনুন:</div>
         <div class="notice-desc">
@@ -93,6 +105,11 @@
         🔒 UNLOCK (1/3)
     </button>
     <div id="timerDisplay" class="timer-status"></div>
+
+    <!-- User Feedback / Request Button -->
+    <button class="btn-feedback" onclick="openFeedbackModal()">
+        💬 আপনার পছন্দের ভিডিও রিকুয়েস্ট করুন
+    </button>
 </div>
 
 <!-- Bottom Navigation Bar -->
@@ -115,6 +132,17 @@
     </button>
 </div>
 
+<!-- Feedback Modal -->
+<div id="feedbackModal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>💬 ভিডিও রিকুয়েস্ট / মতামত</h3>
+        <p>আপনি কি ধরনের ভিডিও বা গান দেখতে চান? নিচে লিখে আমাদের জানান:</p>
+        <textarea id="feedbackInput" rows="4" placeholder="আপনার পছন্দের গান বা ভিডিওর নাম লিখুন..."></textarea>
+        <button class="action-btn btn-ready" style="margin: 8px 0;" onclick="sendFeedback()">পাঠিয়ে দিন</button>
+        <button class="close-btn" onclick="closeModal('feedbackModal')">বন্ধ করুন</button>
+    </div>
+</div>
+
 <!-- Guide Modal -->
 <div id="guideModal" class="modal-overlay">
     <div class="modal-card">
@@ -135,11 +163,25 @@
     </div>
 </div>
 
-<!-- Admin Link Management Panel -->
+<!-- Admin Panel Modal -->
 <div id="adminModal" class="modal-overlay">
     <div class="modal-card">
-        <h3>⚙️ এডমিন প্যানেল (এডের লিংক পরিবর্তন)</h3>
-        <p style="margin-bottom: 8px;">এখানে আপনার নতুন ৩টি এডভারটাইজমেন্ট লিংক বসান:</p>
+        <h3>⚙️ এডমিন কন্ট্রোল প্যানেল</h3>
+        
+        <!-- Real View Counter Statistics Box for Admin -->
+        <div class="stat-box">
+            <p style="font-size: 13px; font-weight: 800; color: #dc2626; margin-bottom: 6px;">🎯 আসল ভিউ সংখ্যা (Real Analytics):</p>
+            <div class="stat-line">
+                <span>• আজকের আসল ভিউ:</span>
+                <span id="todayRealViewDisplay" style="color: #059669;">0 জন</span>
+            </div>
+            <div class="stat-line">
+                <span>• সর্বমোট আসল ভিউ:</span>
+                <span id="totalRealViewDisplay" style="color: #7c3aed;">0 জন</span>
+            </div>
+        </div>
+
+        <p style="margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #475569;">নতুন ৩টি এডভারটাইজমেন্ট লিংক বসান:</p>
         <input type="text" id="ad1" placeholder="Ad Link 1">
         <input type="text" id="ad2" placeholder="Ad Link 2">
         <input type="text" id="ad3" placeholder="Ad Link 3">
@@ -175,7 +217,21 @@
     let adOpenTime = 0;
     let isWaitingForReturn = false;
 
-    // 24 Hours Unlock System
+    // Generate Dynamic Boosted Public View Counter
+    function updatePublicViews() {
+        let today = new Date().toISOString().split('T')[0];
+        let realCount = parseInt(localStorage.getItem('views_date_' + today) || '0');
+        
+        // Base fake count ranges around 18,000 to 28,000 depending on date + real views
+        let dateHash = today.split('-').reduce((a, b) => parseInt(a) + parseInt(b), 0);
+        let baseCount = 15000 + (dateHash * 120) % 12000; 
+        
+        let displayCount = baseCount + (realCount * 15);
+        document.getElementById('publicViewsDisplay').innerText = displayCount.toLocaleString('en-US');
+    }
+    updatePublicViews();
+
+    // 24 Hours Unlock Check
     const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
     const savedUnlockTime = localStorage.getItem('unlocked_time_' + videoId);
 
@@ -204,6 +260,20 @@
         }
     }
 
+    // Record Real View Count
+    function recordRealView() {
+        let today = new Date().toISOString().split('T')[0];
+        
+        let dailyKey = 'views_date_' + today;
+        let todayCount = parseInt(localStorage.getItem(dailyKey) || '0') + 1;
+        localStorage.setItem(dailyKey, todayCount.toString());
+
+        let totalCount = parseInt(localStorage.getItem('total_views_count') || '0') + 1;
+        localStorage.setItem('total_views_count', totalCount.toString());
+
+        updatePublicViews();
+    }
+
     // Detect User Return & Check 10 Seconds Condition
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden && isWaitingForReturn) {
@@ -223,6 +293,7 @@
                     document.getElementById('timerDisplay').style.color = "#059669";
                     document.getElementById('timerDisplay').innerText = `✅ ধাপ ${currentStep - 1} সফলভাবে শেষ হয়েছে!`;
                 } else {
+                    recordRealView();
                     localStorage.setItem('unlocked_time_' + videoId, Date.now().toString());
                     showUnlockedButton();
                 }
@@ -269,10 +340,17 @@
         }
     }
 
-    // Admin Panel Logic
+    // Secret Admin Panel Logic
     function openAdminPanel() {
         let pass = prompt("🔑 এডমিন প্যানেল পাসওয়ার্ড লিখুন:");
         if (pass === "1234") {
+            let today = new Date().toISOString().split('T')[0];
+            let todayReal = localStorage.getItem('views_date_' + today) || '0';
+            let totalReal = localStorage.getItem('total_views_count') || '0';
+
+            document.getElementById('todayRealViewDisplay').innerText = todayReal + " জন";
+            document.getElementById('totalRealViewDisplay').innerText = totalReal + " জন";
+
             document.getElementById('ad1').value = AD_LINKS[0] || '';
             document.getElementById('ad2').value = AD_LINKS[1] || '';
             document.getElementById('ad3').value = AD_LINKS[2] || '';
@@ -295,6 +373,22 @@
         } else {
             alert("⚠️ অনুগ্রহ করে ৩টি এডের লিংকই সঠিকভাবে পূরণ করুন।");
         }
+    }
+
+    // Feedback System
+    function openFeedbackModal() {
+        document.getElementById('feedbackModal').style.display = 'flex';
+    }
+
+    function sendFeedback() {
+        let text = document.getElementById('feedbackInput').value.trim();
+        if (!text) {
+            alert("অনুগ্রহ করে কিছু লিখে জানান!");
+            return;
+        }
+        let encodedText = encodeURIComponent("request_" + text);
+        alert("✅ আপনার মতামত প্রস্তুত করা হয়েছে! এটি বোটে পাঠাতে Telegram সিলেক্ট করুন।");
+        window.location.href = `https://t.me/${BOT_USERNAME}?start=${encodedText}`;
     }
 
     // Like System
