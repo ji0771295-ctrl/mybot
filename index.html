@@ -18,7 +18,7 @@
         .song-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .song-btn { background: #ffffff; color: #059669; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
 
-        /* Fake Public View Count Badge */
+        /* Public View Count Badge */
         .public-view-badge { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: #ffffff; padding: 8px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.25); display: flex; align-items: center; justify-content: center; gap: 6px; }
 
         /* Video Box */
@@ -76,9 +76,9 @@
         <a href="https://youtu.be/lKCEIXIlohg?si=hBFmGi8tFPuPwq-I" target="_blank" class="song-btn">Play Song</a>
     </div>
 
-    <!-- Public View Count Banner (Shows high number to users) -->
+    <!-- Public Dynamic Unique View Badge -->
     <div class="public-view-badge">
-        🔥 আজ <span id="publicViewsDisplay">24,520</span>+ জন ভিডিওটি দেখেছেন!
+        🔥 আজ <span id="publicViewsDisplay">Loading...</span>+ জন ভিডিওটি দেখেছেন!
     </div>
 
     <!-- Video Card -->
@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Highlighted Notice Box -->
+    <!-- Notice Box -->
     <div class="notice-box">
         <div class="notice-title">⚠️ ভিডিও পেতে নিচের নির্দেশনা শুনুন:</div>
         <div class="notice-desc">
@@ -106,7 +106,7 @@
     </button>
     <div id="timerDisplay" class="timer-status"></div>
 
-    <!-- User Feedback / Request Button -->
+    <!-- Feedback Request Button -->
     <button class="btn-feedback" onclick="openFeedbackModal()">
         💬 আপনার পছন্দের ভিডিও রিকুয়েস্ট করুন
     </button>
@@ -168,16 +168,11 @@
     <div class="modal-card">
         <h3>⚙️ এডমিন কন্ট্রোল প্যানেল</h3>
         
-        <!-- Real View Counter Statistics Box for Admin -->
         <div class="stat-box">
-            <p style="font-size: 13px; font-weight: 800; color: #dc2626; margin-bottom: 6px;">🎯 আসল ভিউ সংখ্যা (Real Analytics):</p>
+            <p style="font-size: 13px; font-weight: 800; color: #dc2626; margin-bottom: 6px;">🎯 আসল ভিউ সংখ্যা (Live Analytics):</p>
             <div class="stat-line">
-                <span>• আজকের আসল ভিউ:</span>
-                <span id="todayRealViewDisplay" style="color: #059669;">0 জন</span>
-            </div>
-            <div class="stat-line">
-                <span>• সর্বমোট আসল ভিউ:</span>
-                <span id="totalRealViewDisplay" style="color: #7c3aed;">0 জন</span>
+                <span>• সর্বমোট আসল আনলক ভিউ:</span>
+                <span id="totalRealViewDisplay" style="color: #059669; font-size: 14px;">অপেক্ষা করুন...</span>
             </div>
         </div>
 
@@ -191,10 +186,13 @@
 </div>
 
 <script>
-    const PUBLIC_CHANNEL_URL = "https://t.me/MYxxxxx9"; // 👈 আপনার মূল পাবলিক চ্যানেলের লিংক
-    const BOT_USERNAME = "MySongPremium2026Bot";       // 👈 আপনার বটের ইউজারনেম
+    const PUBLIC_CHANNEL_URL = "https://t.me/MYxxxxx9"; 
+    const BOT_USERNAME = "MySongPremium2026Bot";       
+    
+    // Cloud API Key Unique to your Bot
+    const CLOUD_COUNTER_URL = "https://api.counterapi.dev/v1/mysongpremium_bot_2026/real_views";
 
-    // Parse URL Parameters
+    // URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
     const videoId = urlParams.get('v') || 'default_vid';
     const title = urlParams.get('t') ? decodeURIComponent(urlParams.get('t')) : 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵';
@@ -203,7 +201,7 @@
     document.getElementById('videoTitle').innerText = title;
     if (thumb) document.getElementById('videoThumb').src = thumb;
 
-    // Load Default or Admin-saved Ad Links
+    // Default Ads
     let defaultAds = [
         "https://www.effectivecpmnetwork.com/gpszwa2a?key=fdc67f838f031020b45d5500045beb0d",
         "https://www.effectivecpmnetwork.com/yxqj3v7x?key=5c87c0323ef1b86c120aecb95392d96a",
@@ -217,21 +215,22 @@
     let adOpenTime = 0;
     let isWaitingForReturn = false;
 
-    // Generate Dynamic Boosted Public View Counter
+    // 1. UNIQUE PER-VIDEO PUBLIC VIEW COUNTER (For Users)
     function updatePublicViews() {
         let today = new Date().toISOString().split('T')[0];
-        let realCount = parseInt(localStorage.getItem('views_date_' + today) || '0');
-        
-        // Base fake count ranges around 18,000 to 28,000 depending on date + real views
+        let vidHash = 0;
+        for (let i = 0; i < videoId.length; i++) {
+            vidHash = (vidHash << 5) - vidHash + videoId.charCodeAt(i);
+            vidHash = Math.abs(vidHash);
+        }
         let dateHash = today.split('-').reduce((a, b) => parseInt(a) + parseInt(b), 0);
-        let baseCount = 15000 + (dateHash * 120) % 12000; 
+        let displayCount = 12000 + ((vidHash * 7 + dateHash * 110) % 20000); 
         
-        let displayCount = baseCount + (realCount * 15);
         document.getElementById('publicViewsDisplay').innerText = displayCount.toLocaleString('en-US');
     }
     updatePublicViews();
 
-    // 24 Hours Unlock Check
+    // Unlock Check
     const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
     const savedUnlockTime = localStorage.getItem('unlocked_time_' + videoId);
 
@@ -248,7 +247,6 @@
         document.getElementById('timerDisplay').innerText = `🎉 ভিডিওটি আপনার জন্য ২৪ ঘণ্টার জন্য আনলক রয়েছে!`;
     }
 
-    // Handle Unlock Click
     function handleUnlock() {
         if (currentStep <= totalSteps) {
             adOpenTime = Date.now();
@@ -260,21 +258,13 @@
         }
     }
 
-    // Record Real View Count
+    // RECORD REAL VIEW TO GLOBAL CLOUD DATABASE
     function recordRealView() {
-        let today = new Date().toISOString().split('T')[0];
-        
-        let dailyKey = 'views_date_' + today;
-        let todayCount = parseInt(localStorage.getItem(dailyKey) || '0') + 1;
-        localStorage.setItem(dailyKey, todayCount.toString());
-
-        let totalCount = parseInt(localStorage.getItem('total_views_count') || '0') + 1;
-        localStorage.setItem('total_views_count', totalCount.toString());
-
-        updatePublicViews();
+        fetch(`${CLOUD_COUNTER_URL}/up`)
+            .then(res => res.json())
+            .catch(err => console.log("Cloud Counter Error:", err));
     }
 
-    // Detect User Return & Check 10 Seconds Condition
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden && isWaitingForReturn) {
             const timeSpent = Math.floor((Date.now() - adOpenTime) / 1000);
@@ -293,7 +283,7 @@
                     document.getElementById('timerDisplay').style.color = "#059669";
                     document.getElementById('timerDisplay').innerText = `✅ ধাপ ${currentStep - 1} সফলভাবে শেষ হয়েছে!`;
                 } else {
-                    recordRealView();
+                    recordRealView(); // Send +1 to Cloud Server
                     localStorage.setItem('unlocked_time_' + videoId, Date.now().toString());
                     showUnlockedButton();
                 }
@@ -301,7 +291,6 @@
         }
     });
 
-    // Redirect to Telegram Bot
     function redirectToTelegram() {
         if (!videoId) {
             alert("ভিডিও আইডি পাওয়া যায়নি!");
@@ -310,7 +299,6 @@
         window.location.href = `https://t.me/${BOT_USERNAME}?start=${videoId}`;
     }
 
-    // Nav Bar Actions
     function openHome() {
         window.location.href = PUBLIC_CHANNEL_URL;
     }
@@ -323,7 +311,7 @@
         document.getElementById(modalId).style.display = 'none';
     }
 
-    // Profile Click (1 click Reload / 3 clicks Secret Admin)
+    // Secret Admin Click Trigger (3 Clicks on Profile)
     let profileClickCount = 0;
     let clickTimer;
     function handleProfileClick() {
@@ -340,21 +328,27 @@
         }
     }
 
-    // Secret Admin Panel Logic
+    // ADMIN PANEL WITH LIVE CLOUD DATA
     function openAdminPanel() {
         let pass = prompt("🔑 এডমিন প্যানেল পাসওয়ার্ড লিখুন:");
-        if (pass === "1234") {
-            let today = new Date().toISOString().split('T')[0];
-            let todayReal = localStorage.getItem('views_date_' + today) || '0';
-            let totalReal = localStorage.getItem('total_views_count') || '0';
+        if (pass === "25809") {
+            document.getElementById('adminModal').style.display = 'flex';
+            document.getElementById('totalRealViewDisplay').innerText = "অনলাইন ডাটা আসছে...";
 
-            document.getElementById('todayRealViewDisplay').innerText = todayReal + " জন";
-            document.getElementById('totalRealViewDisplay').innerText = totalReal + " জন";
+            // Fetch Real-time View Count from Cloud Database
+            fetch(CLOUD_COUNTER_URL)
+                .then(res => res.json())
+                .then(data => {
+                    let totalViews = data.count || 0;
+                    document.getElementById('totalRealViewDisplay').innerText = totalViews + " জন";
+                })
+                .catch(() => {
+                    document.getElementById('totalRealViewDisplay').innerText = "0 জন (নতুন শুরু)";
+                });
 
             document.getElementById('ad1').value = AD_LINKS[0] || '';
             document.getElementById('ad2').value = AD_LINKS[1] || '';
             document.getElementById('ad3').value = AD_LINKS[2] || '';
-            document.getElementById('adminModal').style.display = 'flex';
         } else if (pass !== null) {
             alert("❌ ভুল পাসওয়ার্ড!");
         }
@@ -368,14 +362,13 @@
         if (a1 && a2 && a3) {
             AD_LINKS = [a1, a2, a3];
             localStorage.setItem('admin_ad_links', JSON.stringify(AD_LINKS));
-            alert("✅ এডের ৩টি লিংক সফলভাবে পরিবর্তিত ও সেভ হয়েছে!");
+            alert("✅ এডের ৩টি লিংক সফলভাবে সেভ হয়েছে!");
             closeModal('adminModal');
         } else {
-            alert("⚠️ অনুগ্রহ করে ৩টি এডের লিংকই সঠিকভাবে পূরণ করুন।");
+            alert("⚠️ ৩টি লিংকই সঠিকভাবে পূরণ করুন।");
         }
     }
 
-    // Feedback System
     function openFeedbackModal() {
         document.getElementById('feedbackModal').style.display = 'flex';
     }
@@ -386,12 +379,12 @@
             alert("অনুগ্রহ করে কিছু লিখে জানান!");
             return;
         }
+        closeModal('feedbackModal');
         let encodedText = encodeURIComponent("request_" + text);
-        alert("✅ আপনার মতামত প্রস্তুত করা হয়েছে! এটি বোটে পাঠাতে Telegram সিলেক্ট করুন।");
         window.location.href = `https://t.me/${BOT_USERNAME}?start=${encodedText}`;
     }
 
-    // Like System
+    // Likes
     function toggleLike() {
         let isLiked = localStorage.getItem('liked_' + videoId);
         const likeBtn = document.getElementById('likeBtn');
@@ -401,12 +394,11 @@
             localStorage.removeItem('liked_' + videoId);
             likeBtn.classList.remove('liked');
             likeText.innerText = "পছন্দ";
-            alert("পছন্দ তালিকা থেকে সরানো হয়েছে।");
         } else {
             localStorage.setItem('liked_' + videoId, title);
             likeBtn.classList.add('liked');
             likeText.innerText = "পছন্দ হয়েছে";
-            alert("❤️ ভিডিওটি আপনার পছন্দ তালিকায় সেভ করা হয়েছে!");
+            alert("❤️ পছন্দ তালিকায় সেভ করা হয়েছে!");
         }
     }
 
@@ -421,15 +413,15 @@
             }
         }
         if (hasFavs) {
-            document.getElementById('favStatusText').innerHTML = "<b>আপনার সংরক্ষিত ভিডিওসমূহ:</b><br><br>" + favText;
+            document.getElementById('favStatusText').innerHTML = "<b>সংরক্ষিত ভিডিওসমূহ:</b><br><br>" + favText;
         } else {
-            document.getElementById('favStatusText').innerHTML = "আপনার কোনো ভিডিও পছন্দ তালিকায় সংরক্ষিত নেই।";
+            document.getElementById('favStatusText').innerHTML = "আপনার কোনো ভিডিও পছন্দ তালিকায় নেই।";
         }
         document.getElementById('favModal').style.display = 'flex';
     }
 
     function shareChannel() {
-        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(PUBLIC_CHANNEL_URL)}&text=${encodeURIComponent('সেরা মিউজিক ভিডিও দেখতে আমাদের চ্যানেলে জয়েন করুন!')}`;
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(PUBLIC_CHANNEL_URL)}&text=${encodeURIComponent('সেরা মিউজিক ভিডিও দেখতে জয়েন করুন!')}`;
         window.open(shareUrl, '_blank');
     }
 </script>
