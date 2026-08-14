@@ -2,7 +2,7 @@ import os
 import logging
 import threading
 import requests
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
@@ -14,7 +14,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- 1. Flask Web Server (UptimeRobot দিয়ে ২৪/৭ চালু রাখার জন্য) ---
+# --- 1. Flask Web Server (UptimeRobot দিয়ে ২৪/৭ চালু রাখার জন্য) ---
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
@@ -28,31 +28,64 @@ def run_flask():
 # --- 2. CONFIGURATION ---
 BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 STORAGE_CHANNEL_ID = -1004499292164
-MAIN_CHANNEL_USERNAME = "@MYxxxxx9"                         # আপনার মূল চ্যানেলের ইউজারনেম
-BOT_USERNAME = "MySongPremium2026Bot"                       # আপনার বটের ইউজারনেম
-WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"     # আপনার গিটহাব পেজের ওয়েবলিংক
+MAIN_CHANNEL_USERNAME = "@MYxxxxx9"            # আপনার মূল চ্যানেলের ইউজারনেম
+BOT_USERNAME = "MySongPremium2026Bot"          # আপনার বটের ইউজারনেম
+WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot" # আপনার গিটহাব পেজের ওয়েবলিংক
+
+# 🔴 আপনার নিজের টেলিগ্রাম নিউমেরিক ID দিন (ইউজার রিকোয়েস্ট আপনার ইনবক্সে পেতে):
+ADMIN_ID = 0  # উদাহরণ: 123456789 (না দিতে চাইলে 0 রেখে দিন)
 
 # --- 3. COMMAND HANDLERS ---
 
-# /start হ্যান্ডলার
+# /start হ্যান্ডলার (ভিডিও পাঠানো ও ইউজার রিকোয়েস্ট গ্রহণ করার জন্য)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # মিনি অ্যাপ থেকে পাঠানো video_id পড়া
     if context.args:
-        video_msg_id = context.args[0]
-        try:
-            await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
+        arg = context.args[0]
+
+        # ১. যদি মিনি অ্যাপ থেকে কোনো ভিডিও/গানের রিকোয়েস্ট আসে
+        if arg.startswith("request_"):
+            raw_request = arg.replace("request_", "").replace("_", " ")
+            user_request = unquote(raw_request) # বাংলা টেক্সট সঠিকভাবে দেখানোর জন্য
             
-            # স্টোরেজ চ্যানেল থেকে নির্দিষ্ট ভিডিওটি ইনবক্সে কপি করে পাঠাবে
-            await context.bot.copy_message(
-                chat_id=chat_id,
-                from_chat_id=STORAGE_CHANNEL_ID,
-                message_id=int(video_msg_id)
+            # ইউজারকে নিশ্চিতকরণ মেসেজ
+            await update.message.reply_text(
+                f"✅ **আপনার রিকোয়েস্টটি এডমিনের কাছে পাঠানো হয়েছে!**\n\n"
+                f"📝 **আপনার মেসেজ:** `{user_request}`\n\n"
+                f"খুব শীঘ্রই আপনার পছন্দের গান/ভিডিও আপলোড করার চেষ্টা করা হবে। ধন্যবাদ!",
+                parse_mode="Markdown"
             )
-        except Exception as e:
-            logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।")
+
+            # (অপশনাল) এডমিনের ইনবক্সে মেসেজ ফরোয়ার্ড করা
+            if ADMIN_ID != 0:
+                try:
+                    user = update.effective_user
+                    admin_msg = (
+                        f"📥 **নতুন ভিডিও রিকোয়েস্ট এসেছে!**\n\n"
+                        f"👤 **ইউজার:** {user.full_name} (@{user.username or 'No Username'})\n"
+                        f"🆔 **আইডি:** `{chat_id}`\n"
+                        f"📝 **মেসেজ:** {user_request}"
+                    )
+                    await context.bot.send_message(chat_id=ADMIN_ID, text=admin_msg, parse_mode="Markdown")
+                except Exception as admin_err:
+                    logger.error(f"Error forwarding request to admin: {admin_err}")
+
+        # ২. যদি মিনি অ্যাপ থেকে ভিডিও ফাইল পাওয়ার লিঙ্ক হয়
+        else:
+            video_msg_id = arg
+            try:
+                await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
+                
+                # স্টোরেজ চ্যানেল থেকে নির্দিষ্ট ভিডিওটি ইনবক্সে কপি করে পাঠাবে
+                await context.bot.copy_message(
+                    chat_id=chat_id,
+                    from_chat_id=STORAGE_CHANNEL_ID,
+                    message_id=int(video_msg_id)
+                )
+            except Exception as e:
+                logger.error(f"Error sending video: {e}")
+                await update.message.reply_text("❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।")
     else:
         await update.message.reply_text("👋 স্বাগতম! ভিডিও পেতে আমাদের চ্যানেলের নির্দিষ্ট মিনি অ্যাপ লিংকে ক্লিক করে আসুন।")
 
@@ -63,7 +96,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not raw_text or "|" not in raw_text:
             await update.message.reply_text(
                 "❌ **ভুল ফরম্যাট!**\n\n"
-                "সঠিক নিয়ম:\n"
+                "সঠিক নিয়ম:\n"
                 "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
                 "উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`",
                 parse_mode="Markdown"
@@ -97,14 +130,14 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         await update.message.reply_text(
-            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!",
+            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!",
             parse_mode="Markdown"
         )
     except Exception as e:
         logger.error(f"Error in create_post: {e}")
-        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
+        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
 
-# --- 4. AUTO VIDEO HANDLER (FIXED) ---
+# --- 4. AUTO VIDEO HANDLER ---
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg.video and not msg.document:
@@ -121,7 +154,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         video_msg_id = str(stored_msg.message_id)
 
-        # ২. ভিডিওর নিজস্ব থাম্বনেইল ছবি সংগ্রহ (ভিডিও ফাইল ডাউনলোড হবে না, শুধু ছবি হবে)
+        # ২. ভিডিওর নিজস্ব থাম্বনেইল ছবি সংগ্রহ
         img_url = "https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png" # ব্যাকআপ
         thumb_obj = None
 
@@ -135,7 +168,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             thumb_path = f"thumb_{msg.message_id}.jpg"
             await thumb_file.download_to_drive(thumb_path)
 
-            # ৩. ফ্রি ইমেজ সার্ভারে আপলোড (কোনো API Key লাগবে না, প্রতিটির ছবি ইউনিক হবে)
+            # ৩. ফ্রি ইমেজ সার্ভারে আপলোড
             try:
                 with open(thumb_path, "rb") as f:
                     response = requests.post(
