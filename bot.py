@@ -27,7 +27,8 @@ def run_flask():
     flask_app.run(host='0.0.0.0', port=port)
 
 # --- 2. CONFIGURATION (আপনার দেয়া তথ্য অনুযায়ী প্রস্তুত) ---
-BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
+BOT_TOKEN = # --- CONFIGURATION ---
+BOT_TOKEN =8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E
 STORAGE_CHANNEL_ID = -1004499292164
 MAIN_CHANNEL_USERNAME = "@MYxxxxx9"                         # আপনার মূল চ্যানেলের ইউজারনেম
 BOT_USERNAME = "MySongPremium2026Bot"                      # আপনার বটের ইউজারনেম
