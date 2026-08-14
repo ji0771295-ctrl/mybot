@@ -36,16 +36,17 @@ IMGBB_API_KEY = "YOUR_IMGBB_API_KEY"                       # ImgBB API Key (অ�
 
 # --- 3. COMMAND HANDLERS ---
 
-# /start হ্যান্ডলার
+# /start হ্যান্ডলার (আপডেট করা নতুন লজিক)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
+    # মিনি অ্যাপ থেকে পাঠানো video_id পড়া
     if context.args:
         video_msg_id = context.args[0]
         try:
             await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
             
-            # প্রাইভেট স্টোরেজ চ্যানেল থেকে ফাইল ইউজারের ইনবক্সে কপি পাঠাবে
+            # স্টোরেজ চ্যানেল থেকে শুধুমাত্র নির্দিষ্ট এই ভিডিওটি ইনবক্সে কপি করে পাঠাবে
             await context.bot.copy_message(
                 chat_id=chat_id,
                 from_chat_id=STORAGE_CHANNEL_ID,
@@ -53,9 +54,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except Exception as e:
             logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত! ফাইলটি পাওয়া যায়নি অথবা প্রাইভেট চ্যানেল থেকে মুছে ফেলা হয়েছে।")
+            await update.message.reply_text("❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।")
     else:
-        await update.message.reply_text("স্বাগতম! আমাদের ভিডিও পেতে চ্যানেলের মিনি অ্যাপ লিংকে ক্লিক করুন।")
+        # সাধারণ স্টার্ট দিলে অন্য কোনো লিঙ্ক বা ভিডিও দেখাবে না
+        await update.message.reply_text("👋 স্বাগতম! ভিডিও পেতে আমাদের চ্যানেলের নির্দিষ্ট মিনি অ্যাপ লিংকে ক্লিক করে আসুন।")
 
 # /post ম্যানুয়াল কমান্ড
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -124,7 +126,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         file_id = msg.video.file_id if msg.video else msg.document.file_id
 
-        # ২. ভিডিও ডাউনলোড ও ১ সেকেণ্ডের ফ্রেম থেকে থাম্বনেইল কাটা
+        # ২. ভিডিও ডাউনলোড ও ১ সেকেন্ডের ফ্রেম থেকে থাম্বনেইল কাটা
         video_file = await context.bot.get_file(file_id)
         video_path = f"video_{msg.message_id}.mp4"
         await video_file.download_to_drive(video_path)
