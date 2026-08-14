@@ -1,7 +1,6 @@
 import os
 import logging
 import threading
-import cv2
 import requests
 from urllib.parse import quote
 from flask import Flask
@@ -32,21 +31,20 @@ STORAGE_CHANNEL_ID = -1004499292164
 MAIN_CHANNEL_USERNAME = "@MYxxxxx9"                         # আপনার মূল চ্যানেলের ইউজারনেম
 BOT_USERNAME = "MySongPremium2026Bot"                       # আপনার বটের ইউজারনেম
 WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"     # আপনার গিটহাব পেজের ওয়েবলিংক
-IMGBB_API_KEY = "YOUR_IMGBB_API_KEY"                       # ImgBB API Key (অপশনাল)
 
 # --- 3. COMMAND HANDLERS ---
 
-# /start হ্যান্ডলার (আপডেট করা নতুন লজিক)
+# /start হ্যান্ডলার
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # মিনি অ্যাপ থেকে পাঠানো video_id পড়া
+    # মিনি অ্যাপ থেকে পাঠানো video_id পড়া
     if context.args:
         video_msg_id = context.args[0]
         try:
             await update.message.reply_text("⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...")
             
-            # স্টোরেজ চ্যানেল থেকে শুধুমাত্র নির্দিষ্ট এই ভিডিওটি ইনবক্সে কপি করে পাঠাবে
+            # স্টোরেজ চ্যানেল থেকে নির্দিষ্ট ভিডিওটি ইনবক্সে কপি করে পাঠাবে
             await context.bot.copy_message(
                 chat_id=chat_id,
                 from_chat_id=STORAGE_CHANNEL_ID,
@@ -54,19 +52,18 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except Exception as e:
             logger.error(f"Error sending video: {e}")
-            await update.message.reply_text("❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।")
+            await update.message.reply_text("❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।")
     else:
-        # সাধারণ স্টার্ট দিলে অন্য কোনো লিঙ্ক বা ভিডিও দেখাবে না
         await update.message.reply_text("👋 স্বাগতম! ভিডিও পেতে আমাদের চ্যানেলের নির্দিষ্ট মিনি অ্যাপ লিংকে ক্লিক করে আসুন।")
 
-# /post ম্যানুয়াল কমান্ড
+# /post ম্যানুয়াল কমান্ড
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
         if not raw_text or "|" not in raw_text:
             await update.message.reply_text(
                 "❌ **ভুল ফরম্যাট!**\n\n"
-                "সঠিক নিয়ম:\n"
+                "সঠিক নিয়ম:\n"
                 "`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n"
                 "উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`",
                 parse_mode="Markdown"
@@ -100,14 +97,14 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         await update.message.reply_text(
-            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!",
+            f"✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!",
             parse_mode="Markdown"
         )
     except Exception as e:
         logger.error(f"Error in create_post: {e}")
-        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
+        await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
 
-# --- 4. AUTO VIDEO HANDLER ---
+# --- 4. AUTO VIDEO HANDLER (FIXED) ---
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg.video and not msg.document:
@@ -124,42 +121,35 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         video_msg_id = str(stored_msg.message_id)
 
-        file_id = msg.video.file_id if msg.video else msg.document.file_id
+        # ২. ভিডিওর নিজস্ব থাম্বনেইল ছবি সংগ্রহ (ভিডিও ফাইল ডাউনলোড হবে না, শুধু ছবি হবে)
+        img_url = "https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png" # ব্যাকআপ
+        thumb_obj = None
 
-        # ২. ভিডিও ডাউনলোড ও ১ সেকেন্ডের ফ্রেম থেকে থাম্বনেইল কাটা
-        video_file = await context.bot.get_file(file_id)
-        video_path = f"video_{msg.message_id}.mp4"
-        await video_file.download_to_drive(video_path)
+        if msg.video and msg.video.thumbnail:
+            thumb_obj = msg.video.thumbnail
+        elif msg.document and msg.document.thumbnail:
+            thumb_obj = msg.document.thumbnail
 
-        cap = cv2.VideoCapture(video_path)
-        cap.set(cv2.CAP_PROP_POS_MSEC, 1000)
-        success, image = cap.read()
-        img_path = f"thumb_{msg.message_id}.jpg"
+        if thumb_obj:
+            thumb_file = await context.bot.get_file(thumb_obj.file_id)
+            thumb_path = f"thumb_{msg.message_id}.jpg"
+            await thumb_file.download_to_drive(thumb_path)
 
-        if success:
-            cv2.imwrite(img_path, image)
-        cap.release()
-
-        # ৩. ইমেজ ব্যাকআপ ইউআরএল
-        img_url = "https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png" 
-        
-        if os.path.exists(img_path) and IMGBB_API_KEY != "YOUR_IMGBB_API_KEY":
+            # ৩. ফ্রি ইমেজ সার্ভারে আপলোড (কোনো API Key লাগবে না, প্রতিটির ছবি ইউনিক হবে)
             try:
-                with open(img_path, "rb") as file:
+                with open(thumb_path, "rb") as f:
                     response = requests.post(
-                        "https://api.imgbb.com/1/upload",
-                        data={"key": IMGBB_API_KEY},
-                        files={"image": file}
+                        "https://catbox.moe/user/api.php",
+                        data={"reqtype": "fileupload"},
+                        files={"fileToUpload": f}
                     )
-                    res_data = response.json()
-                    if res_data.get("success"):
-                        img_url = res_data["data"]["url"]
+                    if response.status_code == 200 and response.text.startswith("http"):
+                        img_url = response.text.strip()
             except Exception as upload_err:
                 logger.error(f"Image upload failed: {upload_err}")
 
-        # মেমোরি ফাঁকা করা
-        if os.path.exists(video_path): os.remove(video_path)
-        if os.path.exists(img_path): os.remove(img_path)
+            if os.path.exists(thumb_path):
+                os.remove(thumb_path)
 
         # ৪. টাইটেল ও মিনি অ্যাপ লিঙ্ক তৈরি
         title = msg.caption or "নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵"
@@ -192,7 +182,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- 5. MAIN FUNCTION ---
 def main():
-    # ফ্লাস্ক ব্যাকগ্রাউন্ড সার্ভার চালু করা (২৪/৭ আপটাইমের জন্য)
     threading.Thread(target=run_flask, daemon=True).start()
 
     app = Application.builder().token(BOT_TOKEN).build()
