@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- 1. Flask Web Server (UptimeRobot দিয়ে ২৪/৭ চালু রাখার জন্য) ---
+# --- 1. Flask Web Server (UptimeRobot দিয়ে ২৪/৭ চালু রাখার জন্য) ---
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
@@ -26,16 +26,13 @@ def run_flask():
     port = int(os.environ.get("PORT", 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
-# --- 2. CONFIGURATION (আপনার দেয়া তথ্য অনুযায়ী প্রস্তুত) ---
-BOT_TOKEN = # --- CONFIGURATION ---
+# --- 2. CONFIGURATION ---
 BOT_TOKEN = "8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E"
 STORAGE_CHANNEL_ID = -1004499292164
 MAIN_CHANNEL_USERNAME = "@MYxxxxx9"                         # আপনার মূল চ্যানেলের ইউজারনেম
-BOT_USERNAME = "MySongPremium2026Bot"                      # আপনার বটের ইউজারনেম
-WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"     # আপনার গিটহাব পেজের ওয়েবলিংক
-
-# ImgBB API Key (ছবি আপলোডের জন্য অপশনাল, না দিলে ডিফল্ট লিংক কাজ করবে)
-IMGBB_API_KEY = "YOUR_IMGBB_API_KEY" 
+BOT_USERNAME = "MySongPremium2026Bot"                       # আপনার বটের ইউজারনেম
+WEB_APP_URL = "https://ji0771295-ctrl.github.io/mybot"     # আপনার গিটহাব পেজের ওয়েবলিংক
+IMGBB_API_KEY = "YOUR_IMGBB_API_KEY"                       # ImgBB API Key (অপশনাল)
 
 # --- 3. COMMAND HANDLERS ---
 
@@ -60,7 +57,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("স্বাগতম! আমাদের ভিডিও পেতে চ্যানেলের মিনি অ্যাপ লিংকে ক্লিক করুন।")
 
-# /post ম্যানুয়াল কমান্ড
+# /post ম্যানুয়াল কমান্ড
 async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         raw_text = " ".join(context.args)
@@ -108,10 +105,10 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error in create_post: {e}")
         await update.message.reply_text(f"❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`", parse_mode="Markdown")
 
-# --- 4. AUTO VIDEO HANDLER (স্বয়ংক্রিয় থাম্বনেইল ও মিনি অ্যাপ লিঙ্ক তৈরি) ---
+# --- 4. AUTO VIDEO HANDLER ---
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
-    if not msg.video:
+    if not msg.video and not msg.document:
         return
 
     status_msg = await msg.reply_text("⏳ ভিডিও প্রসেসিং হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।")
@@ -125,8 +122,10 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         video_msg_id = str(stored_msg.message_id)
 
+        file_id = msg.video.file_id if msg.video else msg.document.file_id
+
         # ২. ভিডিও ডাউনলোড ও ১ সেকেণ্ডের ফ্রেম থেকে থাম্বনেইল কাটা
-        video_file = await context.bot.get_file(msg.video.file_id)
+        video_file = await context.bot.get_file(file_id)
         video_path = f"video_{msg.message_id}.mp4"
         await video_file.download_to_drive(video_path)
 
@@ -156,7 +155,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as upload_err:
                 logger.error(f"Image upload failed: {upload_err}")
 
-        # লোকাল স্টোরেজ মেমোরি ফাকা করা
+        # মেমোরি ফাঁকা করা
         if os.path.exists(video_path): os.remove(video_path)
         if os.path.exists(img_path): os.remove(img_path)
 
@@ -198,7 +197,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("post", create_post))
-    app.add_handler(MessageHandler(filters.VIDEO, handle_video))
+    app.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video))
 
     logger.info("Bot started successfully...")
     app.run_polling()
