@@ -3,33 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Video Zone 🥵</title>
+    <title>Netflix Zone 📺</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-dark: #05070e;
-            --card-bg: #0d1322;
-            --border-color: #1e293b;
-            --cyan-glow: #00f2fe;
-            --cyan-accent: #4facfe;
+            --netflix-red: #E50914;
+            --netflix-red-hover: #b20710;
+            --bg-body: #141414;
+            --bg-card: #1f1f1f;
+            --border-dark: #333333;
+            --text-white: #ffffff;
+            --text-gray: #b3b3b3;
             --gold-glow: #ffd166;
-            --danger-red: #ef4444;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Netflix Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: var(--bg-dark);
-            color: var(--text-main);
+            background: var(--bg-body);
+            color: var(--text-white);
             padding-bottom: 90px;
             display: flex;
             justify-content: center;
@@ -40,22 +39,21 @@
         .app-container {
             width: 100%;
             max-width: 440px;
-            background: var(--bg-dark);
-            padding: 14px;
+            padding: 12px;
             position: relative;
         }
 
-        /* Profile Header */
+        /* Netflix Style Header */
         .user-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border: 1px solid var(--border-color);
+            background: #000;
+            border-bottom: 2px solid var(--netflix-red);
             padding: 12px 14px;
-            border-radius: 18px;
+            border-radius: 8px;
             margin-bottom: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
         }
 
         .user-profile {
@@ -65,17 +63,16 @@
         }
 
         .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--cyan-glow), var(--cyan-accent));
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background: var(--netflix-red);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            color: #000;
-            font-size: 17px;
-            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+            color: #fff;
+            font-size: 16px;
         }
 
         .user-info h2 {
@@ -86,74 +83,112 @@
 
         .user-info p {
             font-size: 10px;
-            color: var(--cyan-glow);
+            color: var(--netflix-red);
             font-weight: 700;
             letter-spacing: 0.5px;
         }
 
         .wallet-badge {
-            background: rgba(0, 242, 254, 0.1);
-            border: 1px solid var(--cyan-glow);
-            padding: 6px 14px;
-            border-radius: 20px;
+            background: #222;
+            border: 1px solid var(--netflix-red);
+            padding: 6px 12px;
+            border-radius: 4px;
             font-weight: 800;
             font-size: 12px;
-            color: var(--cyan-glow);
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
         }
 
         .add-btn {
-            background: var(--cyan-glow);
-            color: #000;
+            background: var(--netflix-red);
+            color: #fff;
             border: none;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             font-weight: 900;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         /* Daily Reward Task */
         .daily-banner {
-            background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
-            border: 1px solid #6d28d9;
-            border-radius: 16px;
-            padding: 12px 16px;
+            background: linear-gradient(135deg, #1f1f1f 0%, #2a1215 100%);
+            border: 1px solid #441316;
+            border-left: 4px solid var(--netflix-red);
+            border-radius: 8px;
+            padding: 12px 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
-            box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
+            margin-bottom: 12px;
         }
 
         .daily-text h3 {
-            font-size: 12.5px;
-            color: var(--gold-glow);
+            font-size: 12px;
+            color: #fff;
             font-weight: 900;
         }
 
         .daily-text p {
             font-size: 10px;
-            color: var(--text-sub);
+            color: var(--text-gray);
             margin-top: 2px;
         }
 
         .claim-btn {
-            background: linear-gradient(135deg, var(--gold-glow), #f59e0b);
-            color: #000;
+            background: var(--netflix-red);
+            color: #fff;
             border: none;
             padding: 8px 14px;
-            border-radius: 12px;
+            border-radius: 4px;
             font-weight: 900;
             font-size: 11px;
             cursor: pointer;
-            box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+            white-space: nowrap;
+        }
+
+        /* Pink Invite / Referral Banner (Exact as requested) */
+        .invite-banner {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            border: 1px solid #f472b6;
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .invite-text h3 {
+            font-size: 12.5px;
+            color: #fff;
+            font-weight: 900;
+        }
+
+        .invite-text p {
+            font-size: 10px;
+            color: #fce7f3;
+            margin-top: 2px;
+        }
+
+        .invite-action-btn {
+            background: #000;
+            color: #f472b6;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 900;
+            font-size: 11.5px;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         /* Search Box */
@@ -164,17 +199,17 @@
 
         .search-box input {
             width: 100%;
-            padding: 12px 42px 12px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            padding: 12px 42px 12px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
             color: #fff;
             font-size: 12px;
             outline: none;
         }
 
         .search-box input:focus {
-            border-color: var(--cyan-glow);
+            border-color: var(--netflix-red);
         }
 
         .search-box .search-icon {
@@ -182,7 +217,7 @@
             right: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-sub);
+            color: var(--text-gray);
             font-size: 14px;
         }
 
@@ -199,9 +234,9 @@
         .categories::-webkit-scrollbar { display: none; }
 
         .chip {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-sub);
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            color: var(--text-gray);
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 11px;
@@ -211,29 +246,28 @@
         }
 
         .chip.active {
-            background: var(--cyan-glow);
-            color: #000;
-            border-color: var(--cyan-glow);
-            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+            background: var(--netflix-red);
+            color: #fff;
+            border-color: var(--netflix-red);
         }
 
-        /* Video Feed Elements */
+        /* Video Feed Elements (Netflix Style) */
         .video-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
             padding: 12px;
             margin-bottom: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             position: relative;
         }
 
         .thumbnail-box {
             width: 100%;
-            height: 210px;
-            border-radius: 14px;
+            height: 200px;
+            border-radius: 6px;
             overflow: hidden;
-            background: #111827;
+            background: #000;
             position: relative;
             margin-bottom: 10px;
         }
@@ -248,34 +282,32 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: #10b981;
+            background: var(--netflix-red);
             color: #fff;
             font-size: 9px;
             font-weight: 900;
             padding: 4px 8px;
-            border-radius: 6px;
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+            border-radius: 3px;
         }
 
         .views-badge {
             position: absolute;
             bottom: 10px;
             left: 10px;
-            background: rgba(5, 7, 14, 0.85);
+            background: rgba(0, 0, 0, 0.8);
             color: var(--gold-glow);
             font-size: 10.5px;
             font-weight: 800;
             padding: 5px 10px;
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 209, 102, 0.3);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 209, 102, 0.2);
         }
 
         .fav-btn {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             color: #fff;
             border: none;
             width: 32px;
@@ -283,7 +315,6 @@
             border-radius: 50%;
             font-size: 13px;
             cursor: pointer;
-            backdrop-filter: blur(4px);
         }
 
         .video-title {
@@ -298,7 +329,7 @@
             display: flex;
             justify-content: space-between;
             font-size: 10.5px;
-            color: var(--text-sub);
+            color: var(--text-gray);
             margin-bottom: 12px;
             align-items: center;
         }
@@ -314,22 +345,25 @@
             flex: 1;
             padding: 12px;
             border: none;
-            border-radius: 20px;
+            border-radius: 4px;
             font-size: 12px;
             font-weight: 900;
             cursor: pointer;
-            background: linear-gradient(135deg, var(--cyan-glow), var(--cyan-accent));
-            color: #000;
-            box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+            background: var(--netflix-red);
+            color: #fff;
+        }
+
+        .unlock-btn:hover {
+            background: var(--netflix-red-hover);
         }
 
         .share-card-btn {
-            background: #1e293b;
+            background: #2a2a2a;
             color: #fff;
-            border: 1px solid #334155;
+            border: 1px solid var(--border-dark);
             width: 42px;
             height: 42px;
-            border-radius: 50%;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -339,12 +373,12 @@
         }
 
         .coin-btn {
-            background: #1e293b;
+            background: #2a2a2a;
             color: var(--gold-glow);
-            border: 1px solid #334155;
+            border: 1px solid var(--border-dark);
             width: 42px;
             height: 42px;
-            border-radius: 50%;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,7 +392,7 @@
             font-weight: 700;
             margin-top: 8px;
             text-align: center;
-            color: var(--cyan-glow);
+            color: var(--netflix-red);
             min-height: 16px;
         }
 
@@ -370,20 +404,19 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 440px;
-            background: rgba(13, 19, 34, 0.95);
-            border-top: 1px solid var(--border-color);
+            background: #000;
+            border-top: 1px solid var(--border-dark);
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
             z-index: 90;
-            backdrop-filter: blur(12px);
         }
 
         .nav-button {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--text-sub);
+            color: var(--text-gray);
             text-decoration: none;
             font-size: 10px;
             font-weight: 700;
@@ -393,7 +426,7 @@
             flex: 1;
         }
 
-        .nav-button.active { color: var(--cyan-glow); }
+        .nav-button.active { color: var(--netflix-red); }
         .nav-button .icon { font-size: 18px; margin-bottom: 2px; }
 
         /* Modals */
@@ -408,50 +441,50 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(4px);
         }
 
         .modal-card {
-            background: var(--card-bg);
+            background: var(--bg-card);
             color: #fff;
-            padding: 22px;
-            border-radius: 22px;
+            padding: 20px;
+            border-radius: 8px;
             width: 90%;
             max-width: 360px;
             text-align: center;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--netflix-red);
         }
 
-        .modal-card h3 { color: var(--cyan-glow); margin-bottom: 8px; font-size: 16px; }
-        .modal-card p { font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
+        .modal-card h3 { color: var(--netflix-red); margin-bottom: 8px; font-size: 16px; }
+        .modal-card p { font-size: 11.5px; color: var(--text-gray); margin-bottom: 14px; line-height: 1.5; }
         .modal-card input {
             width: 100%;
             padding: 11px;
             margin: 6px 0;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+            background: #000;
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
             color: #fff;
             font-size: 12px;
             outline: none;
         }
 
         .payment-box {
-            background: var(--bg-dark);
-            border: 1px dashed var(--cyan-glow);
-            border-radius: 12px;
-            padding: 12px;
+            background: #000;
+            border: 1px dashed var(--netflix-red);
+            border-radius: 4px;
+            padding: 10px;
             margin: 10px 0;
             text-align: left;
             font-size: 11.5px;
         }
 
         .close-btn {
-            background: var(--danger-red);
+            background: #333;
             color: #fff;
             border: none;
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 800;
             margin-top: 8px;
@@ -463,18 +496,18 @@
 <body>
 
 <div class="app-container">
-    <!-- Profile Banner -->
+    <!-- Netflix Header -->
     <div class="user-header">
         <div class="user-profile">
             <div class="avatar" id="userAvatar">U</div>
             <div class="user-info">
                 <h2 id="userName">মেম্বার অ্যাকাউন্ট</h2>
-                <p>PRO VIP MEMBER</p>
+                <p>NETFLIX VIP</p>
             </div>
         </div>
-        <div class="wallet-badge">
+        <div class="wallet-badge" onclick="openCoinModal()">
             🪙 <span id="coinDisplay">0</span> কয়েন
-            <button class="add-btn" onclick="openCoinModal()">+</button>
+            <button class="add-btn">+</button>
         </div>
     </div>
 
@@ -485,6 +518,15 @@
             <p id="dailyBannerSub">৩টি এড দেখলে ১টি কয়েন ফ্রি পাবেন</p>
         </div>
         <button class="claim-btn" id="claimBtn" onclick="handleDailyAdBonus()">এড দেখুন</button>
+    </div>
+
+    <!-- Pink Referral / Invite Banner -->
+    <div class="invite-banner">
+        <div class="invite-text">
+            <h3>বন্ধুদের ইনভাইট করুন 🎁</h3>
+            <p>প্রতিটি সফল রেফারেলে ১টি ভিডিও আনলক ফ্রি!</p>
+        </div>
+        <button class="invite-action-btn" onclick="shareApp()">Invite</button>
     </div>
 
     <!-- Live Search -->
@@ -532,9 +574,9 @@
         <p>এড না দেখে সরাসরি ভিডিও দেখতে কয়েন কিনুন。<br>সর্বনিম্ন ৫০ টাকা (৫ কয়েন) রিচার্জ করতে পারবেন।</p>
         
         <div class="payment-box">
-            <span style="color:var(--cyan-glow); font-weight:800;">বিকাশ/নগদ (Personal):</span><br>
+            <span style="color:var(--netflix-red); font-weight:800;">বিকাশ/নগদ (Personal):</span><br>
             <strong style="font-size:15px; color:#fff;">01346133685</strong><br>
-            <span style="font-size:10px; color:var(--text-sub);">টাকা সেন্ড মানি করে নিচে তথ্য দিন:</span>
+            <span style="font-size:10px; color:var(--text-gray);">টাকা সেন্ড মানি করে নিচে তথ্য দিন:</span>
         </div>
 
         <input type="number" id="coinAmountInput" placeholder="টাকার পরিমাণ (যেমন: ৫০)">
@@ -565,7 +607,7 @@
     const UNLOCK_API_URL = "https://mybot-k94c.onrender.com/api/unlock";
 
     const tg = window.Telegram?.WebApp;
-    let userId = 8672040646; // ডিফল্ট টেস্ট আইডি
+    let userId = 8672040646;
 
     if (tg) {
         tg.ready();
@@ -579,10 +621,8 @@
     }
 
     const fallbackImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80";
-
     let videoList = [];
 
-    // Telegram link parameters ?v=...
     const urlParams = new URLSearchParams(window.location.search);
     const dynamicVid = urlParams.get('v');
     const dynamicTitle = urlParams.get('t');
@@ -619,7 +659,6 @@
     function getTimeAgo(timestamp) {
         if (!timestamp) return "এখনই আপলোড হয়েছে";
         let seconds = Math.floor((Date.now() - timestamp) / 1000);
-        
         if (seconds < 60) return "মাত্রই আপলোড হয়েছে";
         let minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes} মিনিট আগে`;
@@ -629,12 +668,14 @@
         return `${days} দিন আগে`;
     }
 
+    //প্রতিটি ভিডিওর জন্য আলাদা এবং ইউনিক ভিউয়ার্স জেনারেটর (২০০০ থেকে ৩০০০ এর মধ্যে ভিন্ন ভিন্ন সংখ্যা)
     function getUniqueStats(id) {
         let seed = 0;
         let safeId = String(id || Math.random());
         for (let i = 0; i < safeId.length; i++) { seed += safeId.charCodeAt(i); }
         
-        let views = 1200 + (seed % 4000); 
+        // ২০০০ থেকে ৩০০০ এর মধ্যে ইউনিক সংখ্যা ক্যালকুলেট করা
+        let views = 2000 + (seed % 1001); 
         let formattedViews = views.toLocaleString('bn-BD'); 
         let ratingNum = (4.5 + ((seed % 5) * 0.1)).toFixed(1);
         
@@ -649,7 +690,7 @@
         container.innerHTML = "";
 
         if (list.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-sub); margin-top:40px; font-size:12px;">কোনো ভিডিও আপলোড করা হয়নি!<br>নতুন ভিডিও আপলোড করলে এখানে দেখতে পাবেন।</p>`;
+            container.innerHTML = `<p style="text-align:center; color:var(--text-gray); margin-top:40px; font-size:12px;">কোনো ভিডিও আপলোড করা হয়নি!<br>নতুন ভিডিও আপলোড করলে এখানে দেখতে পাবেন।</p>`;
             return;
         }
 
@@ -659,12 +700,7 @@
         list.forEach(vid => {
             let step = videoProgress[vid.id] || 0;
             let btnText = `🎬 ভিডিও দেখুন (${step}/3)`;
-            
-            let isItemNew = false;
-            if (vid.timestamp) {
-                isItemNew = (currentTime - vid.timestamp) < ONE_DAY_MS;
-            }
-
+            let isItemNew = vid.timestamp ? (currentTime - vid.timestamp) < ONE_DAY_MS : false;
             let badgeHtml = isItemNew ? '<span class="badge-tag">⚡ NEW</span>' : '';
             let timeAgoText = getTimeAgo(vid.timestamp);
             let stats = getUniqueStats(vid.id);
@@ -803,7 +839,6 @@
         }
     });
 
-    // Server-Side Secure Coin Unlock API Integration
     async function useCoinUnlock(vId) {
         if (confirm("🪙 ১টি কয়েন খরচ করে এড ছাড়াই ভিডিওটি সরাসরি দেখতে চান?")) {
             try {
