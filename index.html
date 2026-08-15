@@ -2,97 +2,456 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber High-Monetized Video App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyber Ultra-Monetized Telegram Mini App</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-dark: #070a13;
-            --card-bg: #0f172a;
+            --bg-dark: #05070e;
+            --card-bg: #0d1322;
             --border-color: #1e293b;
             --cyan-glow: #00f2fe;
+            --cyan-accent: #4facfe;
             --gold-glow: #ffd166;
             --danger-red: #ef4444;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: var(--bg-dark); color: var(--text-main); padding-bottom: 90px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 420px; background: var(--bg-dark); padding: 14px; position: relative; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        /* User Header */
-        .user-header { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 16px; margin-bottom: 12px; }
-        .user-profile { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan-glow), #4facfe); display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000; }
-        .user-info h2 { font-size: 13px; font-weight: 800; color: #fff; }
-        .user-info p { font-size: 10px; color: var(--cyan-glow); font-weight: 700; }
+        body {
+            background: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 90px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        .wallet-badge { background: rgba(0, 242, 254, 0.1); border: 1px solid var(--cyan-glow); padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 12px; color: var(--cyan-glow); display: flex; align-items: center; gap: 6px; }
-        .add-btn { background: var(--cyan-glow); color: #000; border: none; width: 20px; height: 20px; border-radius: 50%; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .app-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--bg-dark);
+            padding: 14px;
+            position: relative;
+        }
 
-        /* Daily Ad Task Banner */
-        .daily-banner { background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%); border: 1px solid #4c1d95; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
-        .daily-text h3 { font-size: 12px; color: var(--gold-glow); font-weight: 900; }
-        .daily-text p { font-size: 10px; color: var(--text-sub); }
-        .claim-btn { background: linear-gradient(135deg, var(--gold-glow), #f59e0b); color: #000; border: none; padding: 8px 12px; border-radius: 12px; font-weight: 900; font-size: 10.5px; cursor: pointer; box-shadow: 0 0 10px rgba(255, 209, 102, 0.4); }
+        /* Profile Header */
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan-glow), var(--cyan-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: #000;
+            font-size: 17px;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+
+        .user-info h2 {
+            font-size: 14px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .user-info p {
+            font-size: 10px;
+            color: var(--cyan-glow);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .wallet-badge {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--cyan-glow);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 12px;
+            color: var(--cyan-glow);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .add-btn {
+            background: var(--cyan-glow);
+            color: #000;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Daily Reward Task */
+        .daily-banner {
+            background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%);
+            border: 1px solid #6d28d9;
+            border-radius: 16px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.25);
+        }
+
+        .daily-text h3 {
+            font-size: 12.5px;
+            color: var(--gold-glow);
+            font-weight: 900;
+        }
+
+        .daily-text p {
+            font-size: 10px;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        .claim-btn {
+            background: linear-gradient(135deg, var(--gold-glow), #f59e0b);
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 11px;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+        }
 
         /* Search Box */
-        .search-box { position: relative; margin-bottom: 12px; }
-        .search-box input { width: 100%; padding: 11px 40px 11px 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; color: #fff; font-size: 12px; outline: none; }
-        .search-box .search-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: var(--cyan-glow); border: none; width: 28px; height: 28px; border-radius: 50%; color: #000; font-size: 11px; cursor: pointer; }
+        .search-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
 
-        /* Categories */
-        .categories { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
-        .chip { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-sub); padding: 7px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; cursor: pointer; whitespace: nowrap; }
-        .chip.active { background: var(--cyan-glow); color: #000; border: none; box-shadow: 0 0 12px rgba(0, 242, 254, 0.4); }
+        .search-box input {
+            width: 100%;
+            padding: 12px 42px 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+        }
 
-        /* Video Feed List */
-        .video-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
-        .thumbnail-box { width: 100%; height: 200px; border-radius: 14px; overflow: hidden; background: #000; position: relative; margin-bottom: 10px; }
-        .thumbnail-box img { width: 100%; height: 100%; object-fit: cover; }
-        
-        .badge-tag { position: absolute; top: 10px; left: 10px; background: var(--cyan-glow); color: #000; font-size: 9px; font-weight: 900; padding: 4px 8px; border-radius: 8px; }
-        .views-badge { position: absolute; bottom: 10px; left: 10px; background: rgba(0, 0, 0, 0.85); color: var(--gold-glow); font-size: 10.5px; font-weight: 800; padding: 5px 9px; border-radius: 8px; backdrop-filter: blur(4px); border: 1px solid rgba(255, 209, 102, 0.3); }
-        .fav-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 13px; cursor: pointer; }
+        .search-box input:focus {
+            border-color: var(--cyan-glow);
+        }
 
-        .video-title { font-size: 13.5px; font-weight: 800; color: #fff; margin-bottom: 4px; line-height: 1.4; }
-        .video-time { font-size: 10.5px; color: var(--text-sub); margin-bottom: 10px; }
+        .search-box .search-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-sub);
+            font-size: 14px;
+        }
 
-        /* Buttons */
-        .action-row { display: flex; gap: 8px; align-items: center; }
-        .unlock-btn { flex: 1; padding: 11px; border: none; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3); }
-        .icon-btn { background: #1e293b; color: var(--gold-glow); border: 1px solid #334155; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; text-decoration: none; flex-shrink: 0; }
+        /* Category Filter Chips */
+        .categories {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
 
-        .status-msg { font-size: 11px; font-weight: 700; margin-top: 8px; text-align: center; color: var(--cyan-glow); }
+        .categories::-webkit-scrollbar { display: none; }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid var(--border-color); display: flex; justify-around; padding: 8px 0; z-index: 90; backdrop-filter: blur(10px); }
-        .nav-button { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); text-decoration: none; font-size: 10px; font-weight: 700; cursor: pointer; background: none; border: none; flex: 1; }
+        .chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-sub);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .chip.active {
+            background: var(--cyan-glow);
+            color: #000;
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Video Feed Elements */
+        .video-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .thumbnail-box {
+            width: 100%;
+            height: 210px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #111827;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .thumbnail-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--cyan-glow);
+            color: #000;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .views-badge {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(5, 7, 14, 0.85);
+            color: var(--gold-glow);
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 5px 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 209, 102, 0.3);
+        }
+
+        .fav-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 13px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10.5px;
+            color: var(--text-sub);
+            margin-bottom: 12px;
+        }
+
+        /* Action Row */
+        .action-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .unlock-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 900;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--cyan-glow), var(--cyan-accent));
+            color: #000;
+            box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+        }
+
+        .coin-btn {
+            background: #1e293b;
+            color: var(--gold-glow);
+            border: 1px solid #334155;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .status-msg {
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-align: center;
+            color: var(--cyan-glow);
+            min-height: 16px;
+        }
+
+        /* Nav Footer */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 440px;
+            background: rgba(13, 19, 34, 0.95);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 90;
+            backdrop-filter: blur(12px);
+        }
+
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            background: none;
+            border: none;
+            flex: 1;
+        }
+
         .nav-button.active { color: var(--cyan-glow); }
-        .nav-button .icon { font-size: 16px; margin-bottom: 2px; }
+        .nav-button .icon { font-size: 18px; margin-bottom: 2px; }
 
         /* Modals */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(6px); }
-        .modal-card { background: var(--card-bg); color: #fff; padding: 20px; border-radius: 20px; width: 90%; max-width: 350px; text-align: center; border: 1px solid var(--border-color); }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            color: #fff;
+            padding: 22px;
+            border-radius: 22px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
         .modal-card h3 { color: var(--cyan-glow); margin-bottom: 8px; font-size: 16px; }
-        .modal-card p { font-size: 11px; color: var(--text-sub); margin-bottom: 12px; line-height: 1.4; }
-        .modal-card input { width: 100%; padding: 10px; margin: 6px 0; background: var(--bg-dark); border: 1px solid var(--border-color); border-radius: 10px; color: #fff; font-size: 11px; outline: none; }
-        .payment-box { background: var(--bg-dark); border: 1px dashed var(--cyan-glow); border-radius: 10px; padding: 10px; margin: 8px 0; text-align: left; font-size: 11px; }
-        .close-btn { background: var(--danger-red); color: #fff; border: none; padding: 9px; border-radius: 10px; cursor: pointer; font-weight: 800; margin-top: 8px; width: 100%; font-size: 11px; }
+        .modal-card p { font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; line-height: 1.5; }
+        .modal-card input {
+            width: 100%;
+            padding: 11px;
+            margin: 6px 0;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .payment-box {
+            background: var(--bg-dark);
+            border: 1px dashed var(--cyan-glow);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px 0;
+            text-align: left;
+            font-size: 11.5px;
+        }
+
+        .close-btn {
+            background: var(--danger-red);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            margin-top: 8px;
+            width: 100%;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- User Header -->
+<div class="app-container">
+    <!-- Profile Banner -->
     <div class="user-header">
         <div class="user-profile">
             <div class="avatar" id="userAvatar">U</div>
             <div class="user-info">
                 <h2 id="userName">মেম্বার অ্যাকাউন্ট</h2>
-                <p>PRO VIP Member</p>
+                <p>PRO VIP MEMBER</p>
             </div>
         </div>
         <div class="wallet-badge">
@@ -101,22 +460,22 @@
         </div>
     </div>
 
-    <!-- Daily Ad Task Banner (3 Ads Required for Bonus) -->
+    <!-- Daily Reward Task -->
     <div class="daily-banner">
         <div class="daily-text">
             <h3>এড দেখে ফ্রি ১টি কয়েন নিন 🎁</h3>
             <p id="dailyBannerSub">৩টি এড দেখলে ১টি কয়েন ফ্রি পাবেন</p>
         </div>
-        <button class="claim-btn" id="claimBtn" onclick="handleDailyAdBonus()">এড দেখে ক্লেম করুন</button>
+        <button class="claim-btn" id="claimBtn" onclick="handleDailyAdBonus()">এড দেখুন</button>
     </div>
 
-    <!-- Search Box -->
+    <!-- Live Search -->
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ভিডিওর নাম লিখে খুঁজুন..." oninput="filterVideos()">
-        <button class="search-btn">🔍</button>
+        <input type="text" id="searchInput" placeholder="ভিডিওর নাম দিয়ে খুঁজুন..." oninput="filterVideos()">
+        <span class="search-icon">🔍</span>
     </div>
 
-    <!-- Categories -->
+    <!-- Filter Categories -->
     <div class="categories">
         <div class="chip active" onclick="filterCategory('all', this)">⭐ সব ভিডিও</div>
         <div class="chip" onclick="filterCategory('dance', this)">🔥 ট্রেন্ডিং ডান্স</div>
@@ -124,7 +483,7 @@
         <div class="chip" onclick="filterCategory('reels', this)">⚡ শর্টস রিলস</div>
     </div>
 
-    <!-- Video Feed Container -->
+    <!-- Video Feed List -->
     <div id="videoFeedContainer"></div>
 </div>
 
@@ -148,7 +507,7 @@
     </a>
 </div>
 
-<!-- BUY COIN MODAL -->
+<!-- COIN SHOP MODAL -->
 <div id="coinModal" class="modal-overlay">
     <div class="modal-card">
         <h3>🪙 কয়েন রিচার্জ শপ</h3>
@@ -156,7 +515,7 @@
         
         <div class="payment-box">
             <span style="color:var(--cyan-glow); font-weight:800;">বিকাশ/নগদ (Personal):</span><br>
-            <strong style="font-size:14px; color:#fff;">01346133685</strong><br>
+            <strong style="font-size:15px; color:#fff;">01346133685</strong><br>
             <span style="font-size:10px; color:var(--text-sub);">টাকা সেন্ড মানি করে নিচে তথ্য দিন:</span>
         </div>
 
@@ -168,11 +527,11 @@
     </div>
 </div>
 
-<!-- ADMIN PANEL MODAL (Hidden Password Access) -->
+<!-- SECRET ADMIN MODAL -->
 <div id="adminModal" class="modal-overlay">
     <div class="modal-card">
-        <h3>⚙️ এডমিন প্যানেল</h3>
-        <p>আপনার ৩টি এডের লিংক আপডেট করুন:</p>
+        <h3>⚙️ গোপন এডমিন প্যানেল</h3>
+        <p>আপনার ৩টি এডের লিংক যখন খুশি পরিবর্তন করুন:</p>
         <input type="text" id="ad1Input" placeholder="Ad Link 1">
         <input type="text" id="ad2Input" placeholder="Ad Link 2">
         <input type="text" id="ad3Input" placeholder="Ad Link 3">
@@ -186,18 +545,25 @@
     const BOT_USERNAME = "MySongPremium2026Bot";
     const tg = window.Telegram?.WebApp;
 
-    if (tg && tg.initDataUnsafe?.user) {
-        let user = tg.initDataUnsafe.user;
-        document.getElementById('userName').innerText = `${user.first_name} ${user.last_name || ''}`;
-        document.getElementById('userAvatar').innerText = user.first_name.charAt(0).toUpperCase();
+    if (tg) {
+        tg.ready();
+        tg.expand();
+        if (tg.initDataUnsafe?.user) {
+            let user = tg.initDataUnsafe.user;
+            document.getElementById('userName').innerText = `${user.first_name} ${user.last_name || ''}`;
+            document.getElementById('userAvatar').innerText = user.first_name.charAt(0).toUpperCase();
+        }
     }
 
-    // Video Feed Database (Each video with dynamic realistic 'Today Views')
+    // High Quality SVG Fallback Thumbnail (Ensures zero black boxes)
+    const fallbackImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'><rect width='400' height='200' fill='%230f172a'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2300f2fe' font-size='20' font-family='sans-serif' font-weight='bold'>🔥 Trending HD Video</text></svg>";
+
+    // Default Video Feed Database
     let videoList = [
         {
             id: "v1",
             title: "নতুন এক্সক্লুসিভ ট্রেন্ডিং মিউজিক ও ডান্স পারফর্মেন্স 🥵",
-            thumb: "https://via.placeholder.com/400x200/0f172a/00f2fe?text=Trending+Music",
+            thumb: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&q=80",
             category: "dance",
             isNew: true,
             timeAgo: "১০ মিনিট আগে",
@@ -205,8 +571,8 @@
         },
         {
             id: "v2",
-            title: "ভিআইপি ভাইরাল শর্টস কালেকশন ২০২৬ 🔥",
-            thumb: "https://via.placeholder.com/400x200/0f172a/ffd166?text=VIP+Viral+Shorts",
+            title: "ভিআইপি ভাইরাল শর্টস ও এক্সক্লুসিভ কালেকশন ২০২৬ 🔥",
+            thumb: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&q=80",
             category: "vip",
             isNew: false,
             timeAgo: "১ দিন আগে",
@@ -215,7 +581,7 @@
         {
             id: "v3",
             title: "হট ও ট্রেন্ডিং স্পেশাল রিলস সংকলন 💥",
-            thumb: "https://via.placeholder.com/400x200/0f172a/00f2fe?text=Special+Reels",
+            thumb: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=500&q=80",
             category: "reels",
             isNew: true,
             timeAgo: "২ ঘণ্টা আগে",
@@ -224,7 +590,7 @@
         {
             id: "v4",
             title: "নাইট স্পেশাল ডান্স পারফর্মেন্স এইচডি কোয়ালিটি ⚡",
-            thumb: "https://via.placeholder.com/400x200/0f172a/ffd166?text=Night+Special",
+            thumb: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=500&q=80",
             category: "dance",
             isNew: true,
             timeAgo: "৩০ মিনিট আগে",
@@ -232,27 +598,57 @@
         }
     ];
 
+    // DYNAMIC PARSER: If Telegram link opens App with dynamic ?v=... params
+    const urlParams = new URLSearchParams(window.location.search);
+    const dynamicVid = urlParams.get('v');
+    const dynamicTitle = urlParams.get('t');
+    const dynamicThumb = urlParams.get('img');
+
+    if (dynamicVid) {
+        let existingIndex = videoList.findIndex(item => item.id === dynamicVid);
+        let newVidObj = {
+            id: dynamicVid,
+            title: dynamicTitle ? decodeURIComponent(dynamicTitle) : "এক্সক্লুসিভ স্পেশাল ভিডিও 🔥",
+            thumb: dynamicThumb ? decodeURIComponent(dynamicThumb) : fallbackImage,
+            category: "vip",
+            isNew: true,
+            timeAgo: "এখনই যুক্ত হয়েছে",
+            todayViews: "১,২০০ জন আজকে দেখেছে 🔥"
+        };
+        if (existingIndex > -1) {
+            videoList[existingIndex] = newVidObj;
+        } else {
+            videoList.unshift(newVidObj);
+        }
+    }
+
     let userCoins = parseInt(localStorage.getItem('user_coins') || "0");
     document.getElementById('coinDisplay').innerText = userCoins;
 
-    // Exact Ad Links provided by user
+    // User Ads
     let defaultAds = [
         "https://www.effectivecpmnetwork.com/jw6f2542?key=be9b19eb6446684b83c7c176c2e6eff6",
         "https://www.effectivecpmnetwork.com/db1i2ymy4?key=7d652bbed150823806f251b23de82443",
         "https://www.effectivecpmnetwork.com/h95nhbcbu?key=d326ecd341b3ed1b724abdf4bafb257c"
     ];
+
     let AD_LINKS = JSON.parse(localStorage.getItem('admin_ad_links')) || defaultAds;
 
-    // Tracking variables (Every play requires 3 ads strictly)
-    let videoProgress = {}; // Stores current step (0, 1, 2) for each video
+    let videoProgress = {};
     let activeVidId = null;
     let isDailyTaskActive = false;
     let dailyStep = 0;
     let openTime = 0;
 
+    // Render Video Feed with Image Error Fallback
     function renderVideos(list) {
         const container = document.getElementById('videoFeedContainer');
         container.innerHTML = "";
+
+        if (list.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:var(--text-sub); margin-top:30px;">কোনো ভিডিও পাওয়া যায়নি!</p>`;
+            return;
+        }
 
         list.forEach(vid => {
             let step = videoProgress[vid.id] || 0;
@@ -261,19 +657,22 @@
             container.innerHTML += `
                 <div class="video-card">
                     <div class="thumbnail-box">
-                        <img src="${vid.thumb}" alt="Thumb">
-                        <span class="badge-tag">${vid.isNew ? '⚡ NEW' : 'পুরোনো'}</span>
+                        <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
+                        <span class="badge-tag">${vid.isNew ? '⚡ NEW' : 'HOT'}</span>
                         <span class="views-badge">👁️ ${vid.todayViews}</span>
-                        <button class="fav-btn" onclick="alert('❤️ সেভ করা হয়েছে!')">❤️</button>
+                        <button class="fav-btn" onclick="alert('❤️ ভিডিও সেভ করা হয়েছে!')">❤️</button>
                     </div>
                     <div class="video-title">${vid.title}</div>
-                    <div class="video-time">🕒 ${vid.timeAgo}</div>
+                    <div class="video-meta">
+                        <span>🕒 ${vid.timeAgo}</span>
+                        <span>⭐ ৪.৯ রেটিং</span>
+                    </div>
                     
                     <div class="action-row">
                         <button id="btn_${vid.id}" class="unlock-btn" onclick="handleVideoClick('${vid.id}')">
                             ${btnText}
                         </button>
-                        <button class="icon-btn" title="১টি কয়েন দিয়ে দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
+                        <button class="coin-btn" title="১টি কয়েন দিয়ে সরাসরি দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
                     </div>
                     <div id="status_${vid.id}" class="status-msg"></div>
                 </div>
@@ -283,7 +682,7 @@
 
     renderVideos(videoList);
 
-    // Daily Bonus Ad Handler (Requires 3 Ads)
+    // Daily Bonus Ads Handler
     function handleDailyAdBonus() {
         let lastClaim = localStorage.getItem('last_claim_date');
         let today = new Date().toDateString();
@@ -300,7 +699,7 @@
         document.getElementById('dailyBannerSub').innerText = `⏳ এড (${dailyStep + 1}/3): ১০ সেকেন্ড অপেক্ষা করুন...`;
     }
 
-    // Video Click Handler (Strictly 3 Ads every single view)
+    // Video Play Click Handler (Strict 3 Ads Per Play)
     function handleVideoClick(vId) {
         activeVidId = vId;
         isDailyTaskActive = false;
@@ -308,20 +707,20 @@
         let currentStep = videoProgress[vId] || 0;
         openTime = Date.now();
         
-        // Open corresponding ad link
         window.open(AD_LINKS[currentStep], '_blank');
-        document.getElementById(`status_${vId}`).innerText = `⏳ এড (${currentStep + 1}/3): ১০ সেকেন্ড অপেক্ষা করুন...`;
+        let statusEl = document.getElementById(`status_${vId}`);
+        if(statusEl) statusEl.innerText = `⏳ এড (${currentStep + 1}/3): ১০ সেকেন্ড অপেক্ষা করুন...`;
     }
 
-    // Dynamic 10-Second Strict Ad Timer Validation
+    // 10-Second Strict Timer Validation
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden) {
             let timeSpent = Math.floor((Date.now() - openTime) / 1000);
 
-            // Case A: Daily Claim Task (3 Ads needed)
+            // Daily Task Check
             if (isDailyTaskActive) {
                 if (timeSpent < 10) {
-                    alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড ছিলেন!\nকয়েন পেতে পুরো ১০ সেকেন্ড এড দেখতে হবে।`);
+                    alert(`⚠️ আপনি এডের পেজে মাত্র ${timeSpent} সেকেন্ড ছিলেন!\nকয়েন পেতে অন্তত ১০ সেকেন্ড এডে থাকুন।`);
                 } else {
                     dailyStep++;
                     if (dailyStep < 3) {
@@ -342,7 +741,7 @@
                 return;
             }
 
-            // Case B: Video Play (Strictly 3 Ads required every time)
+            // Video Ad Logic
             if (activeVidId !== null) {
                 let vId = activeVidId;
                 let currentStep = videoProgress[vId] || 0;
@@ -350,7 +749,7 @@
                 let btnEl = document.getElementById(`btn_${vId}`);
 
                 if (timeSpent < 10) {
-                    alert(`⚠️ আপনি এডের পেজে মাত্র ${timeSpent} সেকেন্ড ছিলেন!\nভিডিও দেখতে পুরো ১০ সেকেন্ড এড দেখতে হবে।`);
+                    alert(`⚠️ আপনি এডের পেজে মাত্র ${timeSpent} সেকেন্ড ছিলেন!\nভিডিও আনলক করতে অন্তত ১০ সেকেন্ড এডে থাকুন।`);
                     if(statusEl) statusEl.innerText = `❌ ১০ সেকেন্ড পূরণ হয়নি (${timeSpent}/10s)`;
                 } else {
                     currentStep++;
@@ -359,10 +758,9 @@
                         if(btnEl) btnEl.innerText = `🎬 ভিডিও দেখুন (${currentStep}/3)`;
                         if(statusEl) statusEl.innerText = `✅ এড ${currentStep}/3 সম্পন্ন! পরবর্তী এডে ক্লিক করুন।`;
                     } else {
-                        // All 3 ads done -> Redirect to bot player & RESET progress immediately!
-                        videoProgress[vId] = 0; 
+                        videoProgress[vId] = 0; // Reset after complete unlock
                         if(btnEl) btnEl.innerText = `🎬 ভিডিও দেখুন (0/3)`;
-                        if(statusEl) statusEl.innerText = `🎉 ৩টি এড সম্পন্ন! রিডাইরেক্ট হচ্ছে...`;
+                        if(statusEl) statusEl.innerText = `🎉 ৩টি এড সম্পন্ন! বটে ভিডিও পাঠানো হচ্ছে...`;
                         
                         setTimeout(() => {
                             window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
@@ -374,15 +772,13 @@
         }
     });
 
-    // Use 1 Coin to bypass 3 ads for 1 view
+    // Use 1 Coin to Bypass Ads
     function useCoinUnlock(vId) {
         if (userCoins >= 1) {
-            if (confirm("🪙 ১টি কয়েন খরচ করে ৩টি এড ছাড়া এখনই ভিডিওটি দেখতে চান?")) {
+            if (confirm("🪙 ১টি কয়েন খরচ করে এড ছাড়াই ভিডিওটি সরাসরি দেখতে চান?")) {
                 userCoins--;
                 localStorage.setItem('user_coins', userCoins.toString());
                 document.getElementById('coinDisplay').innerText = userCoins;
-                
-                // Redirect directly
                 window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
             }
         } else {
@@ -390,7 +786,7 @@
         }
     }
 
-    // Filter Functions
+    // Filters
     function filterCategory(cat, el) {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
@@ -419,24 +815,27 @@
     }
 
     function shareApp() {
-        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + BOT_USERNAME + '/app?startapp=v1')}&text=${encodeURIComponent('🔥 সেরা এক্সক্লুসিভ ভাইরাল ভিডিও মিনি অ্যাপ দেখুন!')}`;
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + BOT_USERNAME + '/app?startapp=v1')}&text=${encodeURIComponent('🔥 সেরা এক্সক্লুসিভ ভিডিও মিনি অ্যাপটি দেখুন!')}`;
         window.open(shareUrl, '_blank');
     }
 
-    // Admin Access (Triple Click Profile Icon)
+    // Triple Click Admin Access (Password: 25809)
     let pClicks = 0, pTimer;
     function handleAdminAccess() {
         pClicks++;
-        if (pClicks === 1) pTimer = setTimeout(() => pClicks = 0, 800);
-        else if (pClicks === 3) {
+        if (pClicks === 1) {
+            pTimer = setTimeout(() => pClicks = 0, 800);
+        } else if (pClicks === 3) {
             clearTimeout(pTimer);
             pClicks = 0;
-            let pass = prompt("🔑 এডমিন পাসওয়ার্ড:");
+            let pass = prompt("🔑 এডমিন পাসওয়ার্ড দিন:");
             if (pass === "25809") {
                 document.getElementById('ad1Input').value = AD_LINKS[0] || '';
                 document.getElementById('ad2Input').value = AD_LINKS[1] || '';
                 document.getElementById('ad3Input').value = AD_LINKS[2] || '';
                 document.getElementById('adminModal').style.display = 'flex';
+            } else if (pass !== null) {
+                alert("❌ ভুল পাসওয়ার্ড!");
             }
         }
     }
@@ -448,8 +847,10 @@
         if (a1 && a2 && a3) {
             AD_LINKS = [a1, a2, a3];
             localStorage.setItem('admin_ad_links', JSON.stringify(AD_LINKS));
-            alert("✅ আপনার নতুন ৩টি এড লিংক সেভ হয়েছে!");
+            alert("✅ নতুন ৩টি এড লিংক সফলভাবে সেভ করা হয়েছে!");
             closeModal('adminModal');
+        } else {
+            alert("⚠️ অনুগ্রহ করে ৩টি ঘরই পূরণ করুন!");
         }
     }
 
