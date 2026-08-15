@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Ultra-Monetized Telegram Mini App</title>
+    <title>Video Zone 🥵</title>
     <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -225,6 +225,7 @@
             padding: 12px;
             margin-bottom: 16px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         .thumbnail-box {
@@ -247,12 +248,13 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            background: var(--cyan-glow);
-            color: #000;
+            background: #10b981;
+            color: #fff;
             font-size: 9px;
             font-weight: 900;
             padding: 4px 8px;
             border-radius: 6px;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
         }
 
         .views-badge {
@@ -298,6 +300,7 @@
             font-size: 10.5px;
             color: var(--text-sub);
             margin-bottom: 12px;
+            align-items: center;
         }
 
         /* Action Row */
@@ -318,6 +321,21 @@
             background: linear-gradient(135deg, var(--cyan-glow), var(--cyan-accent));
             color: #000;
             box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3);
+        }
+
+        .share-card-btn {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #334155;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            flex-shrink: 0;
         }
 
         .coin-btn {
@@ -511,7 +529,7 @@
 <div id="coinModal" class="modal-overlay">
     <div class="modal-card">
         <h3>🪙 কয়েন রিচার্জ শপ</h3>
-        <p>এড না দেখে সরাসরি ভিডিও দেখতে কয়েন কিনুন।<br>সর্বনিম্ন ৫০ টাকা (৫ কয়েন) রিচার্জ করতে পারবেন।</p>
+        <p>এড না দেখে সরাসরি ভিডিও দেখতে কয়েন কিনুন。<br>সর্বনিম্ন ৫০ টাকা (৫ কয়েন) রিচার্জ করতে পারবেন।</p>
         
         <div class="payment-box">
             <span style="color:var(--cyan-glow); font-weight:800;">বিকাশ/নগদ (Personal):</span><br>
@@ -543,7 +561,6 @@
 
 <script>
     const BOT_USERNAME = "MySongPremium2026Bot";
-    // Render ব্যাকএন্ড লাইভ লিংক
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
 
     const tg = window.Telegram?.WebApp;
@@ -558,13 +575,11 @@
         }
     }
 
-    // Professional Fallback Image
     const fallbackImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80";
 
-    // ফ্রেশ ভিডিও ডাটাবেজ (শুরুতে খালি বা ব্যাকএন্ড থেকে আসা ভিডিও লোড হবে)
     let videoList = [];
 
-    // DYNAMIC PARSER: Telegram link parameters ?v=...
+    // Telegram link parameters ?v=...
     const urlParams = new URLSearchParams(window.location.search);
     const dynamicVid = urlParams.get('v');
     const dynamicTitle = urlParams.get('t');
@@ -576,8 +591,7 @@
             title: dynamicTitle ? decodeURIComponent(dynamicTitle) : "এক্সক্লুসিভ স্পেশাল ভিডিও 🔥",
             thumb: dynamicThumb ? decodeURIComponent(dynamicThumb) : fallbackImage,
             category: "vip",
-            timestamp: Date.now(),
-            todayViews: "১,২০০ জন আজকে দেখেছে 🔥"
+            timestamp: Date.now()
         };
         videoList.unshift(newVidObj);
     }
@@ -585,7 +599,6 @@
     let userCoins = parseInt(localStorage.getItem('user_coins') || "0");
     document.getElementById('coinDisplay').innerText = userCoins;
 
-    // User Ads Links
     let defaultAds = [
         "https://www.effectivecpmnetwork.com/jw6f2542?key=be9b19eb6446684b83c7c176c2e6eff6",
         "https://www.effectivecpmnetwork.com/db1i2ymy4?key=7d652bbed150823806f251b23de82443",
@@ -600,12 +613,12 @@
     let dailyStep = 0;
     let openTime = 0;
 
-    // Time Ago Formatter (কত মিনিট/ঘণ্টা/দিন আগে আপলোড হয়েছে)
+    // Exact Time Ago Formatter requested by user
     function getTimeAgo(timestamp) {
-        if (!timestamp) return "এখনই আপলোড হয়েছে";
+        if (!timestamp) return "এখনই আপলোড হয়েছে";
         let seconds = Math.floor((Date.now() - timestamp) / 1000);
         
-        if (seconds < 60) return "মাত্রই আপলোড হয়েছে";
+        if (seconds < 60) return "মাত্রই আপলোড হয়েছে";
         let minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes} মিনিট আগে`;
         let hours = Math.floor(minutes / 60);
@@ -614,7 +627,16 @@
         return `${days} দিন আগে`;
     }
 
-    // Render Videos with 'NEW' tag logic (24 hours rule) and permanent list retention
+    // Unique random views and ratings generator based on video ID hash
+    function getUniqueStats(id) {
+        let seed = 0;
+        for (let i = 0; i < id.length; i++) { seed += id.charCodeAt(i); }
+        let views = 30 + (seed % 950);
+        let ratingNum = (4.5 + ((seed % 5) * 0.1)).toFixed(1);
+        return { views: `${views} জন আজকে দেখেছে 🔥`, rating: `⭐ ${ratingNum} রেটিং` };
+    }
+
+    // Render Videos
     function renderVideos(list) {
         const container = document.getElementById('videoFeedContainer');
         container.innerHTML = "";
@@ -631,7 +653,6 @@
             let step = videoProgress[vid.id] || 0;
             let btnText = `🎬 ভিডিও দেখুন (${step}/3)`;
             
-            // 24 Hours Check for 'NEW' Tag only
             let isItemNew = false;
             if (vid.timestamp) {
                 isItemNew = (currentTime - vid.timestamp) < ONE_DAY_MS;
@@ -639,25 +660,27 @@
 
             let badgeHtml = isItemNew ? '<span class="badge-tag">⚡ NEW</span>' : '';
             let timeAgoText = getTimeAgo(vid.timestamp);
+            let stats = getUniqueStats(vid.id);
 
             container.innerHTML += `
                 <div class="video-card">
                     <div class="thumbnail-box">
                         <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
                         ${badgeHtml}
-                        <span class="views-badge">👁️ ${vid.todayViews || '৩,৫০০ জন আজকে দেখেছে 🔥'}</span>
+                        <span class="views-badge">👁️ ${vid.todayViews || stats.views}</span>
                         <button class="fav-btn" onclick="alert('❤️ ভিডিও সেভ করা হয়েছে!')">❤️</button>
                     </div>
                     <div class="video-title">${vid.title}</div>
                     <div class="video-meta">
                         <span>🕒 ${timeAgoText}</span>
-                        <span>⭐ ৪.৯ রেটিং</span>
+                        <span>${stats.rating}</span>
                     </div>
                     
                     <div class="action-row">
                         <button id="btn_${vid.id}" class="unlock-btn" onclick="handleVideoClick('${vid.id}')">
                             ${btnText}
                         </button>
+                        <button class="share-card-btn" title="ভিডিও শেয়ার করুন" onclick="shareVideo('${vid.id}', '${encodeURIComponent(vid.title)}')">🔗</button>
                         <button class="coin-btn" title="১টি কয়েন দিয়ে সরাসরি দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
                     </div>
                     <div id="status_${vid.id}" class="status-msg"></div>
@@ -666,7 +689,6 @@
         });
     }
 
-    // Render প্রাথমিক রেন্ডার
     renderVideos(videoList);
 
     // Fetch Live Backend Videos
@@ -684,6 +706,12 @@
     }
 
     fetchLiveVideos();
+
+    // Share Single Video
+    function shareVideo(vId, title) {
+        let shareText = `🔥 দারুণ একটি ভিডিও দেখতে ক্লিক করুন:\nhttps://t.me/${BOT_USERNAME}?start=${vId}`;
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(shareText)}`, '_blank');
+    }
 
     // Daily Bonus Ads Handler
     function handleDailyAdBonus() {
