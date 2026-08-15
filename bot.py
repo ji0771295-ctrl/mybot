@@ -188,6 +188,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
                 )
     else:
+        # বটের সাথে চ্যাটে Web App বাটন ব্যবহার করা যাবে
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(
                 '🚀 Open Mini App', web_app=WebAppInfo(url=WEB_APP_URL)
@@ -218,7 +219,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
 
-        # 🌟 মিনি অ্যাপের ডেটাবেজে সেভ করা হলো
+        # মিনি অ্যাপের ডেটাবেজে সেভ করা হলো
         save_video_entry(msg_id, title, img_url)
 
         encoded_v = quote(msg_id, safe='')
@@ -229,10 +230,10 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
-        # Updated to WebAppInfo format
+        # চ্যানেলে পাঠানোর জন্য অবশ্যই সাধারণ url= ব্যবহার করতে হবে, web_app এখানে কাজ করবে না
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(
-                '🎬 Watch Video (Mini App) 🎬', web_app=WebAppInfo(url=final_mini_app_url)
+                '🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url
             )
         ]])
 
@@ -304,7 +305,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         title = msg.caption or 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵'
 
-        # 🌟 মিনি অ্যাপের ডেটাবেজে অটো সেভ করা হলো
+        # মিনি অ্যাপের ডেটাবেজে অটো সেভ করা হলো
         save_video_entry(video_msg_id, title, img_url)
 
         encoded_v = quote(video_msg_id, safe='')
@@ -315,7 +316,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
-        # Updated to WebAppInfo format
+        # এটি আপনার বটের সাথে চ্যাটে আসছে, তাই এখানে WebAppInfo কাজ করবে
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton('🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link))
         ]])
