@@ -226,11 +226,11 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         encoded_t = quote(title, safe='')
         encoded_i = quote(img_url, safe='')
 
+        # পপআপ সমস্যা দূর করার জন্য টেলিগ্রাম মিনি অ্যাপের শর্ট লিংক ব্যবহার করা হলো
         final_mini_app_url = (
-            f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
+            f'https://t.me/{BOT_USERNAME}/viralvideos?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
-        # চ্যানেলে পাঠানোর জন্য অবশ্যই সাধারণ url= ব্যবহার করতে হবে, web_app এখানে কাজ করবে না
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(
                 '🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url
@@ -316,7 +316,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
-        # এটি আপনার বটের সাথে চ্যাটে আসছে, তাই এখানে WebAppInfo কাজ করবে
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton('🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link))
         ]])
