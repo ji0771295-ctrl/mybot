@@ -592,7 +592,7 @@
             thumb: dynamicThumb ? decodeURIComponent(dynamicThumb) : fallbackImage,
             category: "vip",
             timestamp: Date.now()
-        };
+        }
         videoList.unshift(newVidObj);
     }
 
@@ -627,13 +627,23 @@
         return `${days} দিন আগে`;
     }
 
-    // Unique random views and ratings generator based on video ID hash
+    // NEW UNIQUE STATS LOGIC (ভিউ সংখ্যা বড় এবং র্যান্ডম করার জন্য)
     function getUniqueStats(id) {
         let seed = 0;
-        for (let i = 0; i < id.length; i++) { seed += id.charCodeAt(i); }
-        let views = 30 + (seed % 950);
+        let safeId = String(id || Math.random());
+        for (let i = 0; i < safeId.length; i++) { seed += safeId.charCodeAt(i); }
+        
+        // ১২০০ থেকে ৫২০০ এর মধ্যে বড় র্যান্ডম সংখ্যা তৈরি করা
+        let views = 1200 + (seed % 4000); 
+        // সংখ্যাটিকে বাংলা কমা ফরম্যাটে করা (যেমন: ১,৫০০)
+        let formattedViews = views.toLocaleString('bn-BD'); 
+        
         let ratingNum = (4.5 + ((seed % 5) * 0.1)).toFixed(1);
-        return { views: `${views} জন আজকে দেখেছে 🔥`, rating: `⭐ ${ratingNum} রেটিং` };
+        
+        return { 
+            views: `${formattedViews} জন আজকে দেখেছে 🔥`, 
+            rating: `⭐ ${ratingNum} রেটিং` 
+        };
     }
 
     // Render Videos
@@ -642,7 +652,7 @@
         container.innerHTML = "";
 
         if (list.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:var(--text-sub); margin-top:40px; font-size:12px;">কোনো ভিডিও আপলোড করা হয়নি!<br>নতুন ভিডিও আপলোড করলে এখানে দেখতে পাবেন।</p>`;
+            container.innerHTML = `<p style="text-align:center; color:var(--text-sub); margin-top:40px; font-size:12px;">কোনো ভিডিও আপলোড করা হয়নি!<br>নতুন ভিডিও আপলোড করলে এখানে দেখতে পাবেন।</p>`;
             return;
         }
 
@@ -667,7 +677,8 @@
                     <div class="thumbnail-box">
                         <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
                         ${badgeHtml}
-                        <span class="views-badge">👁️ ${vid.todayViews || stats.views}</span>
+                        <!-- এখন থেকে শুধু ডাইনামিক স্ট্যাটস ব্যবহার করা হবে, সার্ভারের ভিউ ইগনোর করা হলো -->
+                        <span class="views-badge">👁️ ${stats.views}</span>
                         <button class="fav-btn" onclick="alert('❤️ ভিডিও সেভ করা হয়েছে!')">❤️</button>
                     </div>
                     <div class="video-title">${vid.title}</div>
@@ -680,7 +691,7 @@
                         <button id="btn_${vid.id}" class="unlock-btn" onclick="handleVideoClick('${vid.id}')">
                             ${btnText}
                         </button>
-                        <button class="share-card-btn" title="ভিডিও শেয়ার করুন" onclick="shareVideo('${vid.id}', '${encodeURIComponent(vid.title)}')">🔗</button>
+                        <button class="share-card-btn" title="ভিডিও শেয়ার করুন" onclick="shareVideo('${vid.id}', '${encodeURIComponent(vid.title)}')">🔗</button>
                         <button class="coin-btn" title="১টি কয়েন দিয়ে সরাসরি দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
                     </div>
                     <div id="status_${vid.id}" class="status-msg"></div>
