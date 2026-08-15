@@ -562,14 +562,17 @@
 <script>
     const BOT_USERNAME = "MySongPremium2026Bot";
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
+    const UNLOCK_API_URL = "https://mybot-k94c.onrender.com/api/unlock";
 
     const tg = window.Telegram?.WebApp;
+    let userId = 8672040646; // ডিফল্ট টেস্ট আইডি
 
     if (tg) {
         tg.ready();
         tg.expand();
         if (tg.initDataUnsafe?.user) {
             let user = tg.initDataUnsafe.user;
+            userId = user.id;
             document.getElementById('userName').innerText = `${user.first_name} ${user.last_name || ''}`;
             document.getElementById('userAvatar').innerText = user.first_name.charAt(0).toUpperCase();
         }
@@ -613,7 +616,6 @@
     let dailyStep = 0;
     let openTime = 0;
 
-    // Exact Time Ago Formatter requested by user
     function getTimeAgo(timestamp) {
         if (!timestamp) return "এখনই আপলোড হয়েছে";
         let seconds = Math.floor((Date.now() - timestamp) / 1000);
@@ -627,17 +629,13 @@
         return `${days} দিন আগে`;
     }
 
-    // NEW UNIQUE STATS LOGIC (ভিউ সংখ্যা বড় এবং র্যান্ডম করার জন্য)
     function getUniqueStats(id) {
         let seed = 0;
         let safeId = String(id || Math.random());
         for (let i = 0; i < safeId.length; i++) { seed += safeId.charCodeAt(i); }
         
-        // ১২০০ থেকে ৫২০০ এর মধ্যে বড় র্যান্ডম সংখ্যা তৈরি করা
         let views = 1200 + (seed % 4000); 
-        // সংখ্যাটিকে বাংলা কমা ফরম্যাটে করা (যেমন: ১,৫০০)
         let formattedViews = views.toLocaleString('bn-BD'); 
-        
         let ratingNum = (4.5 + ((seed % 5) * 0.1)).toFixed(1);
         
         return { 
@@ -646,7 +644,6 @@
         };
     }
 
-    // Render Videos
     function renderVideos(list) {
         const container = document.getElementById('videoFeedContainer');
         container.innerHTML = "";
@@ -677,7 +674,6 @@
                     <div class="thumbnail-box">
                         <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
                         ${badgeHtml}
-                        <!-- এখন থেকে শুধু ডাইনামিক স্ট্যাটস ব্যবহার করা হবে, সার্ভারের ভিউ ইগনোর করা হলো -->
                         <span class="views-badge">👁️ ${stats.views}</span>
                         <button class="fav-btn" onclick="alert('❤️ ভিডিও সেভ করা হয়েছে!')">❤️</button>
                     </div>
@@ -702,7 +698,6 @@
 
     renderVideos(videoList);
 
-    // Fetch Live Backend Videos
     async function fetchLiveVideos() {
         try {
             let response = await fetch(API_URL);
@@ -718,13 +713,11 @@
 
     fetchLiveVideos();
 
-    // Share Single Video
     function shareVideo(vId, title) {
         let shareText = `🔥 দারুণ একটি ভিডিও দেখতে ক্লিক করুন:\nhttps://t.me/${BOT_USERNAME}?start=${vId}`;
         window.open(`https://t.me/share/url?url=${encodeURIComponent(shareText)}`, '_blank');
     }
 
-    // Daily Bonus Ads Handler
     function handleDailyAdBonus() {
         let lastClaim = localStorage.getItem('last_claim_date');
         let today = new Date().toDateString();
@@ -741,7 +734,6 @@
         document.getElementById('dailyBannerSub').innerText = `⏳ এড (${dailyStep + 1}/3): ১০ সেকেন্ড অপেক্ষা করুন...`;
     }
 
-    // Video Play Click Handler
     function handleVideoClick(vId) {
         activeVidId = vId;
         isDailyTaskActive = false;
@@ -754,7 +746,6 @@
         if(statusEl) statusEl.innerText = `⏳ এড (${currentStep + 1}/3): ১০ সেকেন্ড অপেক্ষা করুন...`;
     }
 
-    // 10-Second Timer Validation
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden) {
             let timeSpent = Math.floor((Date.now() - openTime) / 1000);
@@ -812,21 +803,33 @@
         }
     });
 
-    // Use 1 Coin to Bypass Ads
-    function useCoinUnlock(vId) {
-        if (userCoins >= 1) {
-            if (confirm("🪙 ১টি কয়েন খরচ করে এড ছাড়াই ভিডিওটি সরাসরি দেখতে চান?")) {
-                userCoins--;
-                localStorage.setItem('user_coins', userCoins.toString());
-                document.getElementById('coinDisplay').innerText = userCoins;
-                window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
+    // Server-Side Secure Coin Unlock API Integration
+    async function useCoinUnlock(vId) {
+        if (confirm("🪙 ১টি কয়েন খরচ করে এড ছাড়াই ভিডিওটি সরাসরি দেখতে চান?")) {
+            try {
+                let response = await fetch(UNLOCK_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, video_id: vId })
+                });
+                let result = await response.json();
+
+                if (result.status === 'success') {
+                    if(userCoins > 0) userCoins--;
+                    localStorage.setItem('user_coins', userCoins.toString());
+                    document.getElementById('coinDisplay').innerText = userCoins;
+                    alert("🎉 সফল! ভিডিওটি আনলক হয়ে গেছে।");
+                    window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
+                } else {
+                    alert("❌ অপর্যাপ্ত কয়েন! ভিডিও আনলক করতে কয়েন রিচার্জ করুন বা এড দেখুন।");
+                    openCoinModal();
+                }
+            } catch (err) {
+                alert("সার্ভারে সংযোগ স্থাপন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
             }
-        } else {
-            openCoinModal();
         }
     }
 
-    // Filters
     function filterCategory(cat, el) {
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         el.classList.add('active');
@@ -859,7 +862,6 @@
         window.open(shareUrl, '_blank');
     }
 
-    // Triple Click Admin Access (Password: 25809)
     let pClicks = 0, pTimer;
     function handleAdminAccess() {
         pClicks++;
