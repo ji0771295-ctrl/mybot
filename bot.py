@@ -275,13 +275,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
                 )
     else:
-        keyboard = InlineKeyboardMarkup([[
-            InlineKeyboardButton(
-                '🚀 Open Mini App', web_app=WebAppInfo(url=WEB_APP_URL)
-            )
-        ]])
+        # নতুন যোগ করা চ্যানেল লিংক এবং মিনি অ্যাপ বাটন সহ আপডেট করা কিবোর্ড
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url='https://t.me/MYxxxxx9')],
+            [InlineKeyboardButton('🎬 Netflix Zone মিনি অ্যাপ খুলুন', web_app=WebAppInfo(url=WEB_APP_URL))]
+        ])
+        
+        welcome_text = (
+            f"👋 স্বাগতম! আমাদের বটের মাধ্যমে আপনি এক্সক্লুসিভ সব ভিডিও দেখতে পারবেন।\n\n"
+            f"⚠️ ভিডিও ও আপডেট পেতে প্রথমে আমাদের **পাবলিক চ্যানেলে** জয়েন করুন, তারপর মিনি অ্যাপে প্রবেশ করুন।"
+        )
+        
         await update.message.reply_text(
-            '👋 **স্বাগতম!**\nনিচের বাটনে চাপ দিয়ে সরাসরি আমাদের মিনি অ্যাপে প্রবেশ করুন এবং ভিডিও উপভোগ করুন।',
+            welcome_text,
             reply_markup=keyboard,
             parse_mode='Markdown',
         )
