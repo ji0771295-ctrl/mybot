@@ -3,8 +3,9 @@ import logging
 import os
 import threading
 from urllib.parse import quote
+import requests
 from flask import Flask
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -39,13 +40,13 @@ BOT_TOKEN = '8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E'
 STORAGE_CHANNEL_ID = -1004499292164
 MAIN_CHANNEL_USERNAME = '@MYxxxxx9'  # আপনার মূল চ্যানেলের ইউজারনেম
 BOT_USERNAME = 'MySongPremium2026Bot'  # আপনার বটের ইউজারনেম
-WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
+WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
 
-# 🔴 আপনার নিজের টেলিগ্রাম ID দিন (এখানে আপনার ID বসালে সরাসরি ইনবক্সে মেসেজ পাবেন)
-ADMIN_ID = 0  # উদাহরণ: 123456789 (না থাকলে 0 রাখুন)
+# 🔴 আপনার সেটিং করা পার্সোনাল টেলিগ্রাম আইডি
+ADMIN_ID = 8672040646
 
 
-# Helper function: Decode Safe Base64 Bengali/English Text
+# Helper function: Decode Safe Base64 Text
 def decode_base64_text(encoded_str):
   try:
     padding = (
@@ -62,29 +63,58 @@ def decode_base64_text(encoded_str):
 # --- 3. COMMAND HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
   chat_id = update.effective_chat.id
+  user = update.effective_user
 
   if context.args:
     arg = context.args[0]
 
-    # ১. যদি মিনি অ্যাপ থেকে ইউজার রিকোয়েস্ট আসে (বাংলা বা ইংরেজি)
-    if arg.startswith('req_'):
+    # ১. মিনি অ্যাপ থেকে কয়েন কেনার রিকোয়েস্ট (coin_amount_trxid)
+    if arg.startswith('coin_'):
+      parts = arg.split('_')
+      if len(parts) >= 3:
+        amount = parts[1]
+        trx_id = '_'.join(parts[2:])
+
+        await update.message.reply_text(
+            f'✅ **আপনার কয়েন কেনার আবেদনটি জমা হয়েছে!**\n\n'
+            f'💰 **পরিমাণ:** {amount} টাকা\n'
+            f'🧾 **TrxID:** `{trx_id}`\n\n'
+            f'এডমিন ভেরিফাই করে দ্রুত আপনার অ্যাকাউন্টে কয়েন যোগ করে দেবে। ধন্যবাদ!',
+            parse_mode='Markdown',
+        )
+
+        if ADMIN_ID != 0:
+          try:
+            admin_msg = (
+                f'💳 **নতুন কয়েন রিচার্জ রিকোয়েস্ট!**\n\n'
+                f'👤 **ইউজার:** {user.full_name} (@{user.username or "No Username"})\n'
+                f'🆔 **আইডি:** `{chat_id}`\n'
+                f'💵 **টাকা:** {amount} BDT\n'
+                f'🧾 **TrxID:** `{trx_id}`'
+            )
+            await context.bot.send_message(
+                chat_id=ADMIN_ID, text=admin_msg, parse_mode='Markdown'
+            )
+          except Exception as admin_err:
+            logger.error(f'Error notifying admin for coin request: {admin_err}')
+      return
+
+    # ২. যদি মিনি অ্যাপ থেকে টেক্সট/ভিডিও রিকোয়েস্ট আসে
+    elif arg.startswith('req_'):
       raw_payload = arg.replace('req_', '')
       user_request = decode_base64_text(raw_payload)
 
-      # ইউজারকে বার্তা
       await update.message.reply_text(
           f'✅ **আপনার রিকোয়েস্টটি এডমিনের কাছে পাঠানো হয়েছে!**\n\n'
-          f'📝 **আপনার মেসেজ:** `{user_request}`\n\n'
-          f'খুব শীঘ্রই আপনার পছন্দের গান/ভিডিও আপলোড করার চেষ্টা করা হবে। ধন্যবাদ!',
+          f'📝 **মেসেজ:** `{user_request}`\n\n'
+          f'খুব শীঘ্রই আপনার পছন্দের কন্টেন্ট যুক্ত করা হবে। ধন্যবাদ!',
           parse_mode='Markdown',
       )
 
-      # এডমিনের ইনবক্সে বার্তা পাঠানো
       if ADMIN_ID != 0:
         try:
-          user = update.effective_user
           admin_msg = (
-              f'📥 **নতুন ভিডিও রিকোয়েস্ট এসেছে!**\n\n'
+              f'📥 **নতুন ভিডিও রিকোয়েস্ট!**\n\n'
               f'👤 **ইউজার:** {user.full_name} (@{user.username or "No Username"})\n'
               f'🆔 **আইডি:** `{chat_id}`\n'
               f'📝 **মেসেজ:** {user_request}'
@@ -94,8 +124,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
           )
         except Exception as admin_err:
           logger.error(f'Error sending to admin: {admin_err}')
+      return
 
-    # ২. যদি মিনি অ্যাপ থেকে ভিডিও পাওয়ার আইডি আসে
+    # ৩. মিনি অ্যাপ বা চ্যানেল থেকে স্টোরেজ ভিডিও পাওয়ার জন্য (যেমন /start 25)
     else:
       video_msg_id = arg
       try:
@@ -113,8 +144,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
         )
   else:
+    # সাধারণ স্টার্ট বার্তা (ডাইরেক্ট মিনি অ্যাপ বাটনসহ)
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            '🚀 Open Mini App', web_app=WebAppInfo(url=WEB_APP_URL)
+        )
+    ]])
     await update.message.reply_text(
-        '👋 স্বাগতম! ভিডিও পেতে আমাদের চ্যানেলের নির্দিষ্ট মিনি অ্যাপ লিংকে ক্লিক করে আসুন।'
+        '👋 **স্বাগতম!**\nনিচের বাটনে চাপ দিয়ে সরাসরি আমাদের মিনি অ্যাপে প্রবেশ করুন এবং ভিডিও উপভোগ করুন।',
+        reply_markup=keyboard,
+        parse_mode='Markdown',
     )
 
 
@@ -142,26 +181,31 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     encoded_t = quote(title, safe='')
     encoded_i = quote(img_url, safe='')
 
+    # URL Parameter 'img' matching index.html decoding logic
     final_mini_app_url = (
-        f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&i={encoded_i}'
+        f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
     )
 
-    keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton('🔥 Play Video 🔥', url=final_mini_app_url)]]
-    )
+    # Telegram Native Inline WebApp Button (সরাসরি অ্যাপ খুলবে, কোনো পপআপ ছাড়াই)
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            '🎬 Watch Video (Mini App) 🎬',
+            web_app=WebAppInfo(url=final_mini_app_url),
+        )
+    ]])
 
     await context.bot.send_photo(
         chat_id=MAIN_CHANNEL_USERNAME,
         photo=img_url,
         caption=(
-            f'🎬 **{title}**\n\nনিচের বাটনে ক্লিক করে পুরো ভিডিওটি দেখুন:'
+            f'🎬 **{title}**\n\nনিচের বাটনে চাপ দিয়ে সরাসরি ভিডিওটি দেখুন:'
         ),
         reply_markup=keyboard,
         parse_mode='Markdown',
     )
 
     await update.message.reply_text(
-        f'✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!',
+        f'✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে!',
         parse_mode='Markdown',
     )
   except Exception as e:
@@ -178,10 +222,11 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return
 
   status_msg = await msg.reply_text(
-      '⏳ ভিডিও প্রসেসিং হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।'
+      '⏳ ভিডিও স্টোরেজে পাঠানো ও প্রসেসিং হচ্ছে...'
   )
 
   try:
+    # 1. Forward video to storage channel
     stored_msg = await context.bot.copy_message(
         chat_id=STORAGE_CHANNEL_ID,
         from_chat_id=msg.chat_id,
@@ -189,6 +234,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     video_msg_id = str(stored_msg.message_id)
 
+    # 2. Extract and Upload Thumbnail
     img_url = 'https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png'
     thumb_obj = None
 
@@ -223,11 +269,15 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     encoded_t = quote(title, safe='')
     encoded_i = quote(img_url, safe='')
 
-    mini_app_link = f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&i={encoded_i}'
-
-    keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton('🎬 Mini App Link Test', url=mini_app_link)]]
+    mini_app_link = (
+        f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
     )
+
+    keyboard = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
+            '🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link)
+        )
+    ]])
 
     reply_text = (
         f'✅ **ভিডিও প্রসেস সফল হয়েছে!**\n\n'
