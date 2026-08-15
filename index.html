@@ -4,77 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Song Premium - Mini App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #0f172a; color: #f8fafc; padding-bottom: 80px; display: flex; justify-content: center; min-height: 100vh; }
-        .container { width: 100%; max-width: 420px; background: #0f172a; min-height: 100vh; padding: 15px; position: relative; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: #090d16; color: #f8fafc; padding-bottom: 85px; display: flex; justify-content: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 420px; background: #090d16; min-height: 100vh; padding: 16px; position: relative; }
         
-        /* Header & Star Badge */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e293b; margin-bottom: 12px; }
-        .header h1 { color: #8b5cf6; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-        .star-badge { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); padding: 4px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+        /* Premium Header */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 14px; }
+        .header h1 { color: #a78bfa; font-size: 20px; font-weight: 900; letter-spacing: 0.5px; text-shadow: 0 0 12px rgba(167, 139, 250, 0.4); }
+        .star-badge { background: linear-gradient(135deg, rgba(167, 139, 250, 0.2), rgba(236, 72, 153, 0.2)); color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.4); padding: 5px 14px; border-radius: 20px; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 10px rgba(251, 113, 133, 0.2); }
 
-        /* Song Banner */
-        .song-banner { background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; padding: 10px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .song-btn { background: #ffffff; color: #059669; padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
+        /* Glowing YouTube Unlock Banner */
+        .yt-banner { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #ffffff; padding: 14px; border-radius: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .yt-info p { font-size: 13px; font-weight: 800; }
+        .yt-info span { font-size: 11px; opacity: 0.9; font-weight: 600; display: block; margin-top: 2px; }
+        .yt-btn { background: #ffffff; color: #dc2626; padding: 8px 14px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 900; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .yt-btn:active { transform: scale(0.95); }
 
         /* Invite Banner */
-        .invite-card { background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); color: #ffffff; border-radius: 18px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(244, 63, 94, 0.3); }
-        .invite-info h3 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
-        .invite-info p { font-size: 11px; opacity: 0.95; font-weight: 600; }
-        .invite-btn { background: #0f172a; color: #ffffff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .invite-card { background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%); color: #ffffff; border-radius: 16px; padding: 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; box-shadow: 0 6px 18px rgba(236, 72, 153, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .invite-info h3 { font-size: 14px; font-weight: 800; }
+        .invite-info p { font-size: 11px; opacity: 0.9; font-weight: 600; margin-top: 2px; }
+        .invite-btn { background: #0f172a; color: #ffffff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         .invite-btn:active { transform: scale(0.95); }
 
-        /* Public Real View Badge */
-        .public-view-badge { background: #1e293b; color: #f43f5e; border: 1px solid #334155; padding: 8px 12px; border-radius: 20px; font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        /* Public High-Count View Badge */
+        .public-view-badge { background: #131c2e; color: #f43f5e; border: 1px solid #1e293b; padding: 9px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; text-align: center; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: inset 0 0 10px rgba(244, 63, 94, 0.1); }
 
         /* Video Card */
-        .video-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 12px; text-align: center; margin-bottom: 15px; }
-        .video-title { font-size: 15px; font-weight: 700; color: #f8fafc; margin-bottom: 10px; }
-        .thumbnail-box { width: 100%; height: 200px; border-radius: 12px; overflow: hidden; background: #334155; position: relative; margin-bottom: 10px; }
+        .video-card { background: #131c2e; border: 1px solid #1e293b; border-radius: 18px; padding: 14px; text-align: center; margin-bottom: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        .video-title { font-size: 15px; font-weight: 800; color: #f8fafc; margin-bottom: 12px; }
+        .thumbnail-box { width: 100%; height: 210px; border-radius: 14px; overflow: hidden; background: #1e293b; position: relative; margin-bottom: 6px; border: 1px solid #334155; }
         .thumbnail-box img { width: 100%; height: 100%; object-fit: cover; }
         
-        .like-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.65); color: #ffffff; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; }
-        .like-btn.liked { color: #f43f5e; background: rgba(255, 255, 255, 0.9); }
+        .like-btn { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.8); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 700; backdrop-filter: blur(4px); }
+        .like-btn.liked { color: #f43f5e; background: #ffffff; }
 
         /* Notice Box */
-        .notice-box { background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; border-left: 5px solid #ef4444; border-radius: 12px; padding: 12px; margin-bottom: 15px; text-align: left; }
-        .notice-title { color: #f87171; font-size: 14px; font-weight: 800; margin-bottom: 6px; }
-        .notice-desc { color: #fde68a; font-size: 12px; font-weight: 600; line-height: 1.5; }
+        .notice-box { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.4); border-left: 4px solid #f59e0b; border-radius: 14px; padding: 12px; margin-bottom: 14px; text-align: left; }
+        .notice-title { color: #fbbf24; font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+        .notice-desc { color: #fef08a; font-size: 11.5px; font-weight: 600; line-height: 1.6; }
 
         /* Buttons */
-        .action-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: block; text-align: center; }
-        .btn-unlock { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #ffffff; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4); }
-        .btn-ready { background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); }
-        .btn-feedback { background: #334155; color: #38bdf8; margin-top: 10px; padding: 10px; font-size: 13px; border-radius: 10px; border: 1px solid #475569; font-weight: 700; cursor: pointer; width: 100%; }
+        .action-btn { width: 100%; padding: 15px; border: none; border-radius: 14px; font-size: 15px; font-weight: 900; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: block; text-align: center; letter-spacing: 0.3px; }
+        .btn-unlock { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #ffffff; box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4); }
+        .btn-ready { background: linear-gradient(135deg, #10b981, #047857); color: #ffffff; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+        .btn-feedback { background: #131c2e; color: #38bdf8; margin-top: 10px; padding: 11px; font-size: 13px; border-radius: 12px; border: 1px solid #1e293b; font-weight: 700; cursor: pointer; width: 100%; transition: 0.2s; }
         .timer-status { font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center; min-height: 20px; }
 
-        /* Bottom Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: #0f172a; border-top: 1px solid #1e293b; display: flex; justify-content: space-around; padding: 8px 0 6px 0; z-index: 90; }
+        /* Bottom Nav Bar */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid #1e293b; display: flex; justify-around; padding: 10px 0 8px 0; z-index: 90; backdrop-filter: blur(10px); }
         .nav-button { display: flex; flex-direction: column; align-items: center; color: #64748b; text-decoration: none; font-size: 11px; font-weight: 700; cursor: pointer; background: none; border: none; flex: 1; }
-        .nav-button.active { color: #f43f5e; }
+        .nav-button.active { color: #ec4899; }
         .nav-button .icon { font-size: 18px; margin-bottom: 2px; }
 
         /* Modals */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(4px); }
-        .modal-card { background: #1e293b; color: #f8fafc; padding: 20px; border-radius: 18px; width: 90%; max-width: 360px; text-align: center; border: 1px solid #334155; max-height: 85vh; overflow-y: auto; }
-        .modal-card h3 { color: #fb7185; margin-bottom: 10px; font-size: 18px; }
-        .modal-card p { font-size: 12px; color: #94a3b8; margin-bottom: 15px; }
-        .modal-card input { width: 100%; padding: 10px; margin: 6px 0; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 12px; }
-        .close-btn { background: #ef4444; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 10px; width: 100%; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(6px); }
+        .modal-card { background: #131c2e; color: #f8fafc; padding: 20px; border-radius: 20px; width: 90%; max-width: 360px; text-align: center; border: 1px solid #334155; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .modal-card h3 { color: #fb7185; margin-bottom: 8px; font-size: 18px; font-weight: 800; }
+        .modal-card p { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+        .modal-card input { width: 100%; padding: 11px; margin: 6px 0; background: #090d16; border: 1px solid #334155; border-radius: 10px; color: #fff; font-size: 12px; outline: none; }
+        .modal-card input:focus { border-color: #8b5cf6; }
+        .close-btn { background: #ef4444; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: 800; margin-top: 10px; width: 100%; }
 
         /* Leaderboard Items */
-        .leaderboard-item { background: #0f172a; border: 1px solid #334155; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
-        .rank-left { display: flex; align-items: center; gap: 12px; }
-        .rank-number { width: 28px; height: 28px; border-radius: 50%; background: #334155; color: #ffffff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+        .leaderboard-item { background: #090d16; border: 1px solid #1e293b; border-radius: 14px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+        .rank-left { display: flex; align-items: center; gap: 10px; }
+        .rank-number { width: 28px; height: 28px; border-radius: 50%; background: #1e293b; color: #ffffff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
         .rank-1 { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; }
-        .rank-2 { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: #fff; }
-        .rank-3 { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #475569; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 15px; }
         .user-details { text-align: left; }
         .user-name { font-size: 13px; font-weight: 800; color: #f8fafc; }
         .user-ref { font-size: 11px; color: #94a3b8; font-weight: 600; }
-        .rank-stars { color: #fb7185; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 4px; }
+        .rank-stars { color: #fb7185; font-weight: 800; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -85,22 +89,27 @@
         <div class="star-badge">★ <span id="starCountDisplay">0</span></div>
     </div>
 
-    <div class="song-banner">
-        <p>🎵 গানটি শুনুন (অপশনাল)</p>
-        <a href="https://youtu.be/lKCEIXIlohg?si=hBFmGi8tFPuPwq-I" target="_blank" class="song-btn">Play Song</a>
+    <!-- 🎵 YOUTUBE 20 SEC UNLOCK BANNER -->
+    <div class="yt-banner">
+        <div class="yt-info">
+            <p>🎵 ২০ সে. গান শুনে ফ্রি আনলক</p>
+            <span>সম্পূর্ণ ২০ সেকেন্ড শুনলে এড ছাড়া ভিডিও মিলবে</span>
+        </div>
+        <button class="yt-btn" onclick="playYTSong()">Play Song</button>
     </div>
 
     <!-- 🎁 INVITE BANNER -->
     <div class="invite-card">
         <div class="invite-info">
             <h3>বন্ধুদের ইনভাইট করুন 🎁</h3>
-            <p>প্রতিটি সফল রেফারেলে ১টি ভিডিও এড ছাড়া ফ্রি!</p>
+            <p>শেয়ার করলেই চলতি ভিডিওটি ফ্রি আনলক!</p>
         </div>
         <button class="invite-btn" onclick="shareReferralLink()">Invite</button>
     </div>
 
+    <!-- DYNAMIC VIEW BADGE -->
     <div class="public-view-badge">
-        🔥 আজ <span id="publicViewsDisplay">0</span> জন ভিডিওটি দেখেছেন!
+        🔥 আজ <span id="publicViewsDisplay">...</span>+ জন ভিডিওটি দেখেছেন!
     </div>
 
     <div class="video-card">
@@ -112,11 +121,11 @@
     </div>
 
     <div class="notice-box">
-        <div class="notice-title">⚠️ ভিডিও পেতে নিচের নির্দেশনা শুনুন:</div>
+        <div class="notice-title">⚡ আনলক করার ৩টি উপায়:</div>
         <div class="notice-desc">
-            ১. <span>UNLOCK (1/3)</span> বাটনে চাপ দিন।<br>
-            ২. এড ওপেন হলে সেখানে কমপক্ষে <span>১০ সেকেন্ড</span> থাকুন।<br>
-            ৩. ১০ সেকেন্ড পর ফেরত এলে পরবর্তী ধাপ আনলক হবে!
+            ১. নিচে <b>UNLOCK (1/3)</b> চেপে ৩টি এডের ১০ সেকেন্ড ট্রাই করুন।<br>
+            ২. অথবা উপরে <b>Play Song</b> চাপ দিয়ে ২০ সেকেন্ড গান শুনুন।<br>
+            ৩. অথবা <b>Invite</b> চেপে বন্ধুদের টেলিগ্রামে লিংক শেয়ার করুন।
         </div>
     </div>
 
@@ -154,29 +163,30 @@
     </button>
 </div>
 
-<!-- 🏆 LEADERBOARD MODAL -->
+<!-- 🏆 REAL LEADERBOARD MODAL -->
 <div id="rankModal" class="modal-overlay">
     <div class="modal-card">
         <h3>🏆 লিডারবোর্ড</h3>
-        <p>সবচেয়ে বেশি রেফার করে টপ লিস্টে নিজের নাম তুলে নিন!</p>
+        <p>আপনার করা মোট রেফারেল সংখ্যা:</p>
         <div id="leaderboardList"></div>
         <button class="close-btn" onclick="closeModal('rankModal')">বন্ধ করুন</button>
     </div>
 </div>
 
-<!-- ⚙️ ADMIN CONTROL PANEL MODAL (3 AD INPUTS) -->
+<!-- ⚙️ ADMIN PANEL MODAL (EDIT ADS & YOUTUBE LINK) -->
 <div id="adminModal" class="modal-overlay">
     <div class="modal-card">
         <h3>⚙️ এডমিন কন্ট্রোল প্যানেল</h3>
         <p style="color:#10b981; font-size:13px; font-weight:800; margin-bottom:8px;">
-            📊 মোট রিয়েল আনলক ভিউ: <span id="adminRealViews">লোড হচ্ছে...</span>
+            📊 মোট রিয়েল আনলক ভিউ: <span id="adminRealViews">0 জন</span>
         </p>
-        <p style="text-align:left; color:#cbd5e1; font-weight:700;">৩টি এডের লিংক আপডেট করুন:</p>
+        <p style="text-align:left; color:#cbd5e1; font-weight:700; font-size:12px;">এডের লিংক এবং গান আপডেট করুন:</p>
         <input type="text" id="ad1Input" placeholder="Ad Link 1">
         <input type="text" id="ad2Input" placeholder="Ad Link 2">
         <input type="text" id="ad3Input" placeholder="Ad Link 3">
+        <input type="text" id="ytLinkInput" placeholder="YouTube Song Link">
         
-        <button class="action-btn btn-ready" style="margin-top:10px;" onclick="saveAdminAdLinks()">সেভ করুন</button>
+        <button class="action-btn btn-ready" style="margin-top:10px;" onclick="saveAdminLinks()">সেভ করুন</button>
         <button class="close-btn" onclick="closeModal('adminModal')">বাতিল</button>
     </div>
 </div>
@@ -185,8 +195,8 @@
 <div id="feedbackModal" class="modal-overlay">
     <div class="modal-card">
         <h3>💬 ভিডিও রিকুয়েস্ট / মতামত</h3>
-        <p>আপনি কি ধরনের ভিডিও বা গান দেখতে চান? নিচে লিখে জানান:</p>
-        <textarea id="feedbackInput" rows="4" style="width:100%; padding:10px; border-radius:8px; background:#0f172a; color:#fff; border:1px solid #334155; margin-bottom:10px;" placeholder="আপনার পছন্দের গান বা ভিডিওর নাম লিখুন..."></textarea>
+        <p>আপনি কি ধরনের ভিডিও দেখতে চান? নিচে লিখে জানান:</p>
+        <textarea id="feedbackInput" rows="4" style="width:100%; padding:10px; border-radius:10px; background:#090d16; color:#fff; border:1px solid #334155; margin-bottom:10px; font-size:12px; outline:none;" placeholder="পছন্দের গান বা ভিডিওর নাম লিখুন..."></textarea>
         <button class="action-btn btn-ready" onclick="sendFeedback()">পাঠিয়ে দিন</button>
         <button class="close-btn" onclick="closeModal('feedbackModal')">বন্ধ করুন</button>
     </div>
@@ -195,10 +205,11 @@
 <!-- 📖 GUIDE MODAL -->
 <div id="guideModal" class="modal-overlay">
     <div class="modal-card">
-        <h3>📖 ইউজার গাইড ও শেয়ার</h3>
-        <p><b>১. ভিডিও দেখতে:</b> আনলক বাটনে ক্লিক করে এডের পেজে ১০ সেকেন্ড সময় কাটান। ৩টি ধাপ পূরণ হলেই ভিডিও ইনবক্সে পাবেন।<br><br>
-        <b>২. রেফার করে এড ছাড়া ফ্রি দেখুন:</b> ইনভাইট লিংকে বন্ধুদের পাঠালেই কারেন্ট ভিডিও সম্পূর্ণ এড ছাড়া আনলক হয়ে যাবে!</p>
-        <button class="action-btn btn-ready" style="margin-bottom: 10px;" onclick="shareReferralLink()">🔗 ইনভাইট লিংক শেয়ার করুন</button>
+        <h3>📖 ইউজার গাইড</h3>
+        <p>১. <b>এডের মাধ্যমে:</b> ৩টি ধাপের এডে ১০ সেকেন্ড করে সময় পার করে আনলক করুন।<br><br>
+        ২. <b>ইউটিউব গানের মাধ্যমে:</b> ২০ সেকেন্ড গানটি পুরোপুরি শুনলে এড ছাড়া আনলক হবে।<br><br>
+        ৩. <b>রেফারের মাধ্যমে:</b> ইনভাইট বাটনে চেপে শেয়ার করলেই সরাসরি ভিডিও আনলক!</p>
+        <button class="action-btn btn-ready" style="margin-bottom: 10px;" onclick="shareReferralLink()">🔗 শেয়ার করুন</button>
         <button class="close-btn" onclick="closeModal('guideModal')">বন্ধ করুন</button>
     </div>
 </div>
@@ -206,16 +217,21 @@
 <!-- ❤️ FAV MODAL -->
 <div id="favModal" class="modal-overlay">
     <div class="modal-card">
-        <h3>❤️ আপনার পছন্দের ভিডিও</h3>
-        <p id="favStatusText">আপনার লাইক করা ভিডিও তালিকা নিচে দেখা যাবে।</p>
+        <h3>❤️ পছন্দ তালিকা</h3>
+        <p id="favStatusText">পছন্দ করা ভিডিওর তালিকা নিচে দেখাবে।</p>
         <button class="close-btn" onclick="closeModal('favModal')">বন্ধ করুন</button>
     </div>
 </div>
 
 <script>
-    const PUBLIC_CHANNEL_URL = "https://t.me/MYxxxxx9"; 
     const BOT_USERNAME = "MySongPremium2026Bot";       
-    const CLOUD_COUNTER_URL = "https://api.counterapi.dev/v1/mysongpremium_2026_umesh/views";
+
+    // Fetch Telegram User Info
+    let telegramUserName = "ইউজার (আপনি)";
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user) {
+        let u = window.Telegram.WebApp.initDataUnsafe.user;
+        telegramUserName = u.first_name + (u.last_name ? " " + u.last_name : "");
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const videoId = urlParams.get('v') || 'default_vid';
@@ -225,112 +241,61 @@
     document.getElementById('videoTitle').innerText = title;
     if (thumb) document.getElementById('videoThumb').src = thumb;
 
-    // --- REALS VIEW ANALYTICS ---
-    function fetchRealViews() {
-        fetch(CLOUD_COUNTER_URL)
-            .then(res => res.json())
-            .then(data => {
-                let count = (data && data.count !== undefined) ? data.count : 0;
-                document.getElementById('publicViewsDisplay').innerText = count;
-                document.getElementById('adminRealViews').innerText = count + " জন";
-            })
-            .catch(() => {
-                document.getElementById('publicViewsDisplay').innerText = "0";
-                document.getElementById('adminRealViews').innerText = "0 জন";
-            });
-    }
-    fetchRealViews();
-
-    function recordRealView() {
-        fetch(`${CLOUD_COUNTER_URL}/up`)
-            .then(() => fetchRealViews())
-            .catch(err => console.log(err));
-    }
-
-    // --- USER STARS & REFERRAL TRACKING ---
-    let myShares = parseInt(localStorage.getItem('user_share_count') || "0");
-    document.getElementById('starCountDisplay').innerText = myShares;
-
-    // --- LEADERBOARD LOGIC ---
-    function renderLeaderboard() {
-        let baseLeaderboard = [
-            { name: "Tan", ref: 39, stars: 39 },
-            { name: "M'S_", ref: 15, stars: 15 },
-            { name: "MD Atikur Rahman", ref: 8, stars: 8 },
-            { name: "Mim", ref: 5, stars: 5 }
-        ];
-
-        // Add current user to Leaderboard dynamically
-        if (myShares > 0) {
-            baseLeaderboard.push({ name: "আপনি (You)", ref: myShares, stars: myShares });
-        } else {
-            baseLeaderboard.push({ name: "আপনি (You)", ref: 0, stars: 0 });
+    // DYNAMIC HIGH PUBLIC VIEWS
+    function generatePublicViews(vId) {
+        let hash = 0;
+        for (let i = 0; i < vId.length; i++) {
+            hash = (hash << 5) - hash + vId.charCodeAt(i);
+            hash = Math.abs(hash);
         }
+        return (18200 + (hash % 16400)).toLocaleString('en-US');
+    }
+    document.getElementById('publicViewsDisplay').innerText = generatePublicViews(videoId);
 
-        baseLeaderboard.sort((a, b) => b.ref - a.ref);
+    // REAL UNLOCK COUNTER (ADMIN)
+    let totalRealUnlocks = parseInt(localStorage.getItem('admin_real_unlock_count') || "0");
+    function recordRealUnlock() {
+        totalRealUnlocks++;
+        localStorage.setItem('admin_real_unlock_count', totalRealUnlocks.toString());
+        document.getElementById('adminRealViews').innerText = totalRealUnlocks + " জন";
+    }
 
-        const container = document.getElementById('leaderboardList');
-        container.innerHTML = "";
-        baseLeaderboard.forEach((user, index) => {
-            const rankClass = index === 0 ? "rank-1" : index === 1 ? "rank-2" : index === 2 ? "rank-3" : "";
-            const itemHTML = `
-                <div class="leaderboard-item">
-                    <div class="rank-left">
-                        <div class="rank-number ${rankClass}">${index + 1}</div>
-                        <div class="user-avatar">👤</div>
-                        <div class="user-details">
-                            <div class="user-name">${user.name}</div>
-                            <div class="user-ref">রেফার: ${user.ref} টি</div>
-                        </div>
+    // USER STARS & LEADERBOARD
+    let userShareCount = parseInt(localStorage.getItem('my_share_count') || "0");
+    document.getElementById('starCountDisplay').innerText = userShareCount;
+
+    function renderLeaderboard() {
+        document.getElementById('leaderboardList').innerHTML = `
+            <div class="leaderboard-item">
+                <div class="rank-left">
+                    <div class="rank-number rank-1">1</div>
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name">${telegramUserName}</div>
+                        <div class="user-ref">মোট রেফার: ${userShareCount} টি</div>
                     </div>
-                    <div class="rank-stars">★ ${user.stars}</div>
                 </div>
-            `;
-            container.innerHTML += itemHTML;
-        });
+                <div class="rank-stars">★ ${userShareCount}</div>
+            </div>
+        `;
     }
     renderLeaderboard();
 
-    // --- INVITATION & FREE AD-FREE UNLOCK ---
-    function shareReferralLink() {
-        myShares++;
-        localStorage.setItem('user_share_count', myShares.toString());
-        document.getElementById('starCountDisplay').innerText = myShares;
-        renderLeaderboard();
-
-        // INSTANT UNLOCK CURRENT VIDEO WITHOUT ADS!
-        if (videoId && videoId !== 'default_vid') {
-            localStorage.setItem('unlocked_time_' + videoId, Date.now().toString());
-            recordRealView();
-            showUnlockedButton();
-            alert("🎉 রেফার শেয়ার করার জন্য অভিনন্দন! ভিডিওটি এড ছাড়াই আপনার জন্য ফ্রি আনলক করা হয়েছে!");
-        }
-
-        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + BOT_USERNAME + '?start=ref_user')}&text=${encodeURIComponent('🔥 ১০০% এক্সক্লুসিভ ভাইরাল ভিডিও দেখতে এখনই জয়েন করুন! দারুণ সব মিউজিক ভিডিও ফ্রি দেখুন!')}`;
-        window.open(shareUrl, '_blank');
-    }
-
-    // --- AD SYSTEM ---
+    // AD LINKS & YOUTUBE LINK STORAGE
     let defaultAds = [
         "https://www.effectivecpmnetwork.com/gpszwa2a?key=fdc67f838f031020b45d5500045beb0d",
         "https://www.effectivecpmnetwork.com/yxqj3v7x?key=5c87c0323ef1b86c120aecb95392d96a",
         "https://www.effectivecpmnetwork.com/h95nhbcbu?key=d326ecd341b3ed1b724abdf4bafb257c"
     ];
-    let savedAds = JSON.parse(localStorage.getItem('admin_ad_links'));
-    let AD_LINKS = savedAds || defaultAds;
+    let defaultYT = "https://youtu.be/lKCEIXIlohg?si=hBFmGi8tFPuPwq-I";
+
+    let AD_LINKS = JSON.parse(localStorage.getItem('admin_ad_links')) || defaultAds;
+    let YT_SONG_LINK = localStorage.getItem('admin_yt_link') || defaultYT;
 
     let currentStep = 1;
     const totalSteps = 3;
-    let adOpenTime = 0;
-    let isWaitingForReturn = false;
-
-    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-    if (videoId && videoId !== 'default_vid') {
-        const savedUnlockTime = localStorage.getItem('unlocked_time_' + videoId);
-        if (savedUnlockTime && (Date.now() - parseInt(savedUnlockTime)) < TWENTY_FOUR_HOURS) {
-            showUnlockedButton();
-        }
-    }
+    let openTime = 0;
+    let unlockType = ""; // "ad" or "youtube"
 
     function showUnlockedButton() {
         const btn = document.getElementById('mainBtn');
@@ -338,43 +303,77 @@
         btn.innerText = "🎬 ভিডিও পেতে এখানে ক্লিক করুন (Telegram)";
         btn.onclick = redirectToTelegram;
         document.getElementById('timerDisplay').style.color = "#10b981";
-        document.getElementById('timerDisplay').innerText = `🎉 ভিডিওটি আপনার জন্য ২৪ ঘণ্টার জন্য আনলক রয়েছে!`;
+        document.getElementById('timerDisplay').innerText = `🎉 ভিডিওটি ফ্রি আনলক সফল হয়েছে!`;
     }
 
+    // 1. AD UNLOCK SYSTEM (10 SECONDS EACH STEP)
     function handleUnlock() {
         if (currentStep <= totalSteps) {
-            adOpenTime = Date.now();
-            isWaitingForReturn = true;
+            openTime = Date.now();
+            unlockType = "ad";
             window.open(AD_LINKS[currentStep - 1], '_blank');
             document.getElementById('timerDisplay').style.color = "#38bdf8";
             document.getElementById('timerDisplay').innerText = "⏳ এডের পেজে অন্তত ১০ সেকেন্ড অপেক্ষা করুন...";
         }
     }
 
-    document.addEventListener("visibilitychange", function() {
-        if (!document.hidden && isWaitingForReturn) {
-            const timeSpent = Math.floor((Date.now() - adOpenTime) / 1000);
-            if (timeSpent < 10) {
-                const required = 10 - timeSpent;
-                alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড এডে ছিলেন!\nভিডিও পেতে আপনাকে পুরো ১০ সেকেন্ড এডের পেজে থাকতে হবে।`);
-                document.getElementById('timerDisplay').style.color = "#f87171";
-                document.getElementById('timerDisplay').innerText = `❌ ১০ সেকেন্ড পূরণ হয়নি!`;
-            } else {
-                isWaitingForReturn = false;
-                currentStep++;
+    // 2. YOUTUBE UNLOCK SYSTEM (20 SECONDS)
+    function playYTSong() {
+        openTime = Date.now();
+        unlockType = "youtube";
+        window.open(YT_SONG_LINK, '_blank');
+        document.getElementById('timerDisplay').style.color = "#38bdf8";
+        document.getElementById('timerDisplay').innerText = "⏳ ইউটিউবে কমপক্ষে ২০ সেকেন্ড গানটি শুনুন...";
+    }
 
-                if (currentStep <= totalSteps) {
-                    document.getElementById('mainBtn').innerText = `🔒 UNLOCK (${currentStep}/${totalSteps})`;
-                    document.getElementById('timerDisplay').style.color = "#10b981";
-                    document.getElementById('timerDisplay').innerText = `✅ ধাপ ${currentStep - 1} সফলভাবে শেষ হয়েছে!`;
+    // 3. REFERRAL UNLOCK SYSTEM
+    function shareReferralLink() {
+        userShareCount++;
+        localStorage.setItem('my_share_count', userShareCount.toString());
+        document.getElementById('starCountDisplay').innerText = userShareCount;
+        renderLeaderboard();
+
+        recordRealUnlock();
+        showUnlockedButton();
+        alert("🎉 রেফার শেয়ার সফল হয়েছে! ভিডিওটি আপনার জন্য এড ছাড়া আনলক করা হয়েছে!");
+
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + BOT_USERNAME + '?start=ref_user')}&text=${encodeURIComponent('🔥 ১০০% এক্সক্লুসিভ মিউজিক ভিডিও দেখুন কোনো ঝামেলা ছাড়াই!')}`;
+        window.open(shareUrl, '_blank');
+    }
+
+    // TAB RETURN VALIDATION
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden && unlockType !== "") {
+            const timeSpent = Math.floor((Date.now() - openTime) / 1000);
+
+            if (unlockType === "ad") {
+                if (timeSpent < 10) {
+                    alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড এডে ছিলেন!\nভিডিও পেতে পুরো ১০ সেকেন্ড এডের পেজে থাকতে হবে।`);
+                    document.getElementById('timerDisplay').style.color = "#f87171";
+                    document.getElementById('timerDisplay').innerText = `❌ ১০ সেকেন্ড পূরণ হয়নি! (${timeSpent}/10 sec)`;
                 } else {
-                    recordRealView(); 
-                    if (videoId && videoId !== 'default_vid') {
-                        localStorage.setItem('unlocked_time_' + videoId, Date.now().toString());
+                    currentStep++;
+                    if (currentStep <= totalSteps) {
+                        document.getElementById('mainBtn').innerText = `🔒 UNLOCK (${currentStep}/${totalSteps})`;
+                        document.getElementById('timerDisplay').style.color = "#10b981";
+                        document.getElementById('timerDisplay').innerText = `✅ ধাপ ${currentStep - 1} সফল হয়েছে!`;
+                    } else {
+                        recordRealUnlock(); 
+                        showUnlockedButton();
                     }
+                }
+            } else if (unlockType === "youtube") {
+                if (timeSpent < 20) {
+                    alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড ইউটিউবে গান শুনেছেন!\nভিডিওটি আনলক করতে অন্তত ২০ সেকেন্ড গান শুনতে হবে।`);
+                    document.getElementById('timerDisplay').style.color = "#f87171";
+                    document.getElementById('timerDisplay').innerText = `❌ ২০ সেকেন্ড গান শোনা হয়নি! (${timeSpent}/20 sec)`;
+                } else {
+                    recordRealUnlock();
                     showUnlockedButton();
+                    alert("🎉 ২০ সেকেন্ড গান শোনার জন্য ভিডিওটি সফলভাবে আনলক করা হয়েছে!");
                 }
             }
+            unlockType = ""; 
         }
     });
 
@@ -386,7 +385,7 @@
         window.location.href = `https://t.me/${BOT_USERNAME}?start=${videoId}`;
     }
 
-    // --- TAB SWITCHING ---
+    // TAB SWITCHING
     function switchTab(tab) {
         document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
         if (tab === 'home') document.getElementById('navHome').classList.add('active');
@@ -410,7 +409,7 @@
         switchTab('home');
     }
 
-    // --- ADMIN PANEL (TRIPLE CLICK PROFILE) ---
+    // ADMIN PANEL (TRIPLE CLICK PROFILE & 25809 PASS)
     let profileClickCount = 0;
     let clickTimer;
     function handleProfileClick() {
@@ -430,29 +429,33 @@
             document.getElementById('ad1Input').value = AD_LINKS[0] || '';
             document.getElementById('ad2Input').value = AD_LINKS[1] || '';
             document.getElementById('ad3Input').value = AD_LINKS[2] || '';
-            fetchRealViews();
+            document.getElementById('ytLinkInput').value = YT_SONG_LINK || '';
+            document.getElementById('adminRealViews').innerText = totalRealUnlocks + " জন";
             document.getElementById('adminModal').style.display = 'flex';
         } else if (pass !== null) {
             alert("❌ ভুল পাসওয়ার্ড!");
         }
     }
 
-    function saveAdminAdLinks() {
+    function saveAdminLinks() {
         let a1 = document.getElementById('ad1Input').value.trim();
         let a2 = document.getElementById('ad2Input').value.trim();
         let a3 = document.getElementById('ad3Input').value.trim();
+        let yt = document.getElementById('ytLinkInput').value.trim();
 
-        if (a1 && a2 && a3) {
+        if (a1 && a2 && a3 && yt) {
             AD_LINKS = [a1, a2, a3];
+            YT_SONG_LINK = yt;
             localStorage.setItem('admin_ad_links', JSON.stringify(AD_LINKS));
-            alert("✅ ৩টি এডের লিংক সফলভাবে সেভ হয়েছে!");
+            localStorage.setItem('admin_yt_link', YT_SONG_LINK);
+            alert("✅ ৩টি এডের লিংক ও ইউটিউব লিংক সফলভাবে সেভ করা হয়েছে!");
             closeModal('adminModal');
         } else {
-            alert("⚠️ ৩টি ঘরের লিংকই সঠিকভাবে পূরণ করুন।");
+            alert("⚠️ সবগুলো ঘরের লিংক সঠিকভাবে পূরণ করুন।");
         }
     }
 
-    // --- FEEDBACK & FAVORITES ---
+    // FEEDBACK & FAVORITES
     function openFeedbackModal() { document.getElementById('feedbackModal').style.display = 'flex'; }
     function sendFeedback() {
         let text = document.getElementById('feedbackInput').value.trim();
