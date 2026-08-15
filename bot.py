@@ -229,9 +229,10 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
+        # Updated to WebAppInfo format
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(
-                '🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url
+                '🎬 Watch Video (Mini App) 🎬', web_app=WebAppInfo(url=final_mini_app_url)
             )
         ]])
 
@@ -246,7 +247,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         await update.message.reply_text(
-            f'✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে এবং মিনি অ্যাপ ডেটাবেজে যুক্ত হয়েছে!',
+            f'✅ পোস্টটি সফলভাবে **{MAIN_CHANNEL_USERNAME}** চ্যানেলে পোস্ট করা হয়েছে এবং মিনি অ্যাপ ডেটাবেজে যুক্ত হয়েছে!',
             parse_mode='Markdown',
         )
     except Exception as e:
@@ -314,8 +315,9 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
+        # Updated to WebAppInfo format
         keyboard = InlineKeyboardMarkup([[
-            InlineKeyboardButton('🎬 Open Mini App Test', url=mini_app_link)
+            InlineKeyboardButton('🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link))
         ]])
 
         reply_text = (
