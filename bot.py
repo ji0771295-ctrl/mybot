@@ -35,7 +35,6 @@ ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেল�
 def init_db():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    # ইউজার টেবিল (কয়েন এবং রেফার কাউন্ট ট্র্যাক করার জন্য)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -43,7 +42,6 @@ def init_db():
             referrals INTEGER DEFAULT 0
         )
     ''')
-    # আনলক করা ভিডিও টেবিল
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS unlocked_videos (
             user_id INTEGER,
@@ -81,7 +79,6 @@ def save_video_entry(v_id, title, img_url):
         "timeAgo": "এখনই যুক্ত হয়েছে",
         "todayViews": "১,২০০ জন আজকে দেখেছে 🔥"
     }
-    # ডুপ্লিকেট চেক
     for v in videos_db:
         if v['id'] == str(v_id):
             v['title'] = title
@@ -108,14 +105,12 @@ flask_app = Flask(__name__)
 def home():
     return 'Bot & Security Backend is running 24/7 successfully!'
 
-# 🌟 মিনি অ্যাপের জন্য ডাইনামিক ভিডিও API
 @flask_app.route('/api/videos', methods=['GET'])
 def get_videos():
     response = jsonify(videos_db)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-# 🌟 সার্ভার সাইড ভিডিও আনলক ও কয়েন যাচাইকরণ এপিআই (চালাকি রোধ করতে)
 @flask_app.route('/api/unlock', methods=['POST'])
 def unlock_video():
     data = request.json
@@ -128,19 +123,16 @@ def unlock_video():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
 
-    # চেক করুন ভিডিওটি ইতিমধ্যে আনলক করা আছে কি না
     cursor.execute("SELECT * FROM unlocked_videos WHERE user_id = ? AND video_id = ?", (user_id, video_id))
     if cursor.fetchone():
         conn.close()
         return jsonify({"status": "success", "message": "Already unlocked"})
 
-    # ইউজারের কয়েন ব্যালেন্স চেক করা
     cursor.execute("SELECT coins FROM users WHERE user_id = ?", (user_id,))
     user = cursor.fetchone()
     coins = user[0] if user else 0
     
     if coins > 0:
-        # ১টি কয়েন কেটে নেওয়া এবং ভিডিও আনলক লিস্টে যুক্ত করা
         cursor.execute("UPDATE users SET coins = coins - 1 WHERE user_id = ?", (user_id,))
         cursor.execute("INSERT OR IGNORE INTO unlocked_videos (user_id, video_id) VALUES (?, ?)", (user_id, video_id))
         conn.commit()
@@ -154,7 +146,6 @@ def run_flask():
     port = int(os.environ.get('PORT', 8080))
     flask_app.run(host='0.0.0.0', port=port)
 
-# Helper function: Decode Safe Base64 Text
 def decode_base64_text(encoded_str):
     try:
         padding = (
@@ -172,21 +163,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
-    # প্রতিবার স্টার্ট করলে ইউজারকে ডাটাবেজে রেজিস্টার করা (যদি না থাকে)
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (chat_id,))
     conn.commit()
     conn.close()
 
+    # কমন কিবোর্ড (পাবলিক চ্যানেল এবং মিনি অ্যাপ বাটন)
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url='https://t.me/MYxxxxx9')],
+        [InlineKeyboardButton('🎬 Netflix Zone মিনি অ্যাপ খুলুন', web_app=WebAppInfo(url=WEB_APP_URL))]
+    ])
+
     if context.args:
         arg = context.args[0]
 
-        # 🌟 রেফারেল লজিক (যেমন: /start ref_123456)
         if arg.startswith('ref_'):
             try:
                 referrer_id = int(arg.split('_')[1])
-                if referrer_id != chat_id:  # নিজের লিঙ্কে নিজে ক্লিক রোধ করতে
+                if referrer_id != chat_id:
                     conn = sqlite3.connect('database.db')
                     cursor = conn.cursor()
                     cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (referrer_id,))
@@ -196,8 +191,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 logger.error(f"Referral processing error: {e}")
             
+            # এখন রেফারেল লিংকে আসলে টেক্সটের সাথে বাটনগুলোও দেখাবে
             await update.message.reply_text(
-                "✅ **স্বাগতম!** আপনি সফলভাবে রেফারেল লিংকের মাধ্যমে যুক্ত হয়েছেন।",
+                "✅ **স্বাগতম!** আপনি সফলভাবে রেফারেল লিংকের মাধ্যমে যুক্ত হয়েছেন।\n\n"
+                "⚠️ ভিডিও ও আপডেট পেতে প্রথমে আমাদের **পাবলিক চ্যানেলে** জয়েন করুন, তারপর মিনি অ্যাপে প্রবেশ করুন।",
+                reply_markup=keyboard,
                 parse_mode='Markdown'
             )
             return
@@ -275,12 +273,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
                 )
     else:
-        # নতুন যোগ করা চ্যানেল লিংক এবং মিনি অ্যাপ বাটন সহ আপডেট করা কিবোর্ড
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url='https://t.me/MYxxxxx9')],
-            [InlineKeyboardButton('🎬 Netflix Zone মিনি অ্যাপ খুলুন', web_app=WebAppInfo(url=WEB_APP_URL))]
-        ])
-        
         welcome_text = (
             f"👋 স্বাগতম! আমাদের বটের মাধ্যমে আপনি এক্সক্লুসিভ সব ভিডিও দেখতে পারবেন।\n\n"
             f"⚠️ ভিডিও ও আপডেট পেতে প্রথমে আমাদের **পাবলিক চ্যানেলে** জয়েন করুন, তারপর মিনি অ্যাপে প্রবেশ করুন।"
@@ -311,7 +303,6 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
 
-        # মিনি অ্যাপের ডেটাবেজে সেভ করা হলো
         save_video_entry(msg_id, title, img_url)
 
         encoded_v = quote(msg_id, safe='')
@@ -348,7 +339,6 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- 5. AUTO VIDEO HANDLER ---
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg.video and not msg.document:
@@ -396,7 +386,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         title = msg.caption or 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵'
 
-        # মিনি অ্যাপের ডেটাবেজে অটো সেভ করা হলো
         save_video_entry(video_msg_id, title, img_url)
 
         encoded_v = quote(video_msg_id, safe='')
@@ -430,12 +419,9 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- 6. MAIN FUNCTION ---
 def main():
-    # ব্যাকগ্রাউন্ডে Flask সার্ভার রান করানো
     threading.Thread(target=run_flask, daemon=True).start()
 
-    # টেলিগ্রাম বট ইনিশিয়ালাইজেশন
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
