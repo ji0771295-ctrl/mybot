@@ -41,9 +41,7 @@ STORAGE_CHANNEL_ID = -1004499292164
 MAIN_CHANNEL_USERNAME = '@MYxxxxx9'  # আপনার মূল চ্যানেলের ইউজারনেম
 BOT_USERNAME = 'MySongPremium2026Bot'  # আপনার বটের ইউজারনেম
 WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
-
-# 🔴 আপনার সেটিং করা পার্সোনাল টেলিগ্রাম আইডি
-ADMIN_ID = 8672040646
+ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেলিগ্রাম আইডি
 
 
 # Helper function: Decode Safe Base64 Text
@@ -68,7 +66,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
   if context.args:
     arg = context.args[0]
 
-    # ১. মিনি অ্যাপ থেকে কয়েন কেনার রিকোয়েস্ট (coin_amount_trxid)
     if arg.startswith('coin_'):
       parts = arg.split('_')
       if len(parts) >= 3:
@@ -99,7 +96,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.error(f'Error notifying admin for coin request: {admin_err}')
       return
 
-    # ২. যদি মিনি অ্যাপ থেকে টেক্সট/ভিডিও রিকোয়েস্ট আসে
     elif arg.startswith('req_'):
       raw_payload = arg.replace('req_', '')
       user_request = decode_base64_text(raw_payload)
@@ -126,7 +122,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
           logger.error(f'Error sending to admin: {admin_err}')
       return
 
-    # ৩. মিনি অ্যাপ বা চ্যানেল থেকে স্টোরেজ ভিডিও পাওয়ার জন্য (যেমন /start 25)
     else:
       video_msg_id = arg
       try:
@@ -144,7 +139,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
         )
   else:
-    # সাধারণ স্টার্ট বার্তা (ডাইরেক্ট মিনি অ্যাপ বাটনসহ)
     keyboard = InlineKeyboardMarkup([[
         InlineKeyboardButton(
             '🚀 Open Mini App', web_app=WebAppInfo(url=WEB_APP_URL)
@@ -164,8 +158,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
       await update.message.reply_text(
           '❌ **ভুল ফরম্যাট!**\n\n'
           'সঠিক নিয়ম:\n'
-          '`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`\n\n'
-          'উদাহরণ:\n`/post 25 | ভাইরাল ভিডিও | https://i.imgur.com/example.jpg`',
+          '`/post ভিডিও_আইডি | টাইটেল | থাম্বনেইল_ছবি_লিঙ্ক`',
           parse_mode='Markdown',
       )
       return
@@ -181,16 +174,14 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
     encoded_t = quote(title, safe='')
     encoded_i = quote(img_url, safe='')
 
-    # URL Parameter 'img' matching index.html decoding logic
     final_mini_app_url = (
         f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
     )
 
-    # Telegram Native Inline WebApp Button (সরাসরি অ্যাপ খুলবে, কোনো পপআপ ছাড়াই)
+    # 🔴 চ্যানেলে পাঠানোর জন্য url= ব্যবহার করা হয়েছে (Button_type_invalid ফিক্স করা হয়েছে)
     keyboard = InlineKeyboardMarkup([[
         InlineKeyboardButton(
-            '🎬 Watch Video (Mini App) 🎬',
-            web_app=WebAppInfo(url=final_mini_app_url),
+            '🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url
         )
     ]])
 
@@ -226,7 +217,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
   )
 
   try:
-    # 1. Forward video to storage channel
     stored_msg = await context.bot.copy_message(
         chat_id=STORAGE_CHANNEL_ID,
         from_chat_id=msg.chat_id,
@@ -234,7 +224,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     video_msg_id = str(stored_msg.message_id)
 
-    # 2. Extract and Upload Thumbnail
     img_url = 'https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png'
     thumb_obj = None
 
@@ -274,9 +263,7 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     keyboard = InlineKeyboardMarkup([[
-        InlineKeyboardButton(
-            '🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link)
-        )
+        InlineKeyboardButton('🎬 Open Mini App Test', url=mini_app_link)
     ]])
 
     reply_text = (
