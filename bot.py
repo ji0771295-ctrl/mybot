@@ -2,9 +2,10 @@ import base64
 import json
 import logging
 import os
+import sqlite3
 import threading
 from urllib.parse import quote
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import requests
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.ext import (
@@ -15,14 +16,47 @@ from telegram.ext import (
     filters,
 )
 
-# Logging Setup
+# --- Logging Setup ---
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
-# --- JSON Database Persistence ---
+# --- CONFIGURATION ---
+BOT_TOKEN = '8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E'
+STORAGE_CHANNEL_ID = -1004499292164
+MAIN_CHANNEL_USERNAME = '@MYxxxxx9'  # আপনার মূল চ্যানেলের ইউজারনেম
+BOT_USERNAME = 'MySongPremium2026Bot'  # আপনার বটের ইউজারনেম
+WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
+ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেলিগ্রাম আইডি
+
+# --- 1. SQLite Database Setup (Users & Unlocked Videos) ---
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    # ইউজার টেবিল (কয়েন এবং রেফার কাউন্ট ট্র্যাক করার জন্য)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            user_id INTEGER PRIMARY KEY,
+            coins INTEGER DEFAULT 0,
+            referrals INTEGER DEFAULT 0
+        )
+    ''')
+    # আনলক করা ভিডিও টেবিল
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS unlocked_videos (
+            user_id INTEGER,
+            video_id TEXT,
+            PRIMARY KEY (user_id, video_id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# --- 2. JSON Database Persistence (Videos Database) ---
 DB_FILE = "videos_db.json"
 videos_db = []
 
@@ -65,15 +99,14 @@ def _write_to_db():
     except Exception as e:
         logger.error(f"Error writing to JSON DB: {e}")
 
-# ডেটাবেজ লোড
 load_videos()
 
-# --- 1. Flask Web Server ---
+# --- 3. Flask Web Server ---
 flask_app = Flask(__name__)
 
 @flask_app.route('/')
 def home():
-    return 'Bot is running 24/7 successfully!'
+    return 'Bot & Security Backend is running 24/7 successfully!'
 
 # 🌟 মিনি অ্যাপের জন্য ডাইনামিক ভিডিও API
 @flask_app.route('/api/videos', methods=['GET'])
@@ -82,17 +115,44 @@ def get_videos():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+# 🌟 সার্ভার সাইড ভিডিও আনলক ও কয়েন যাচাইকরণ এপিআই (চালাকি রোধ করতে)
+@flask_app.route('/api/unlock', methods=['POST'])
+def unlock_video():
+    data = request.json
+    user_id = data.get('user_id')
+    video_id = data.get('video_id')
+    
+    if not user_id or not video_id:
+        return jsonify({"status": "error", "message": "Invalid data"}), 400
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # চেক করুন ভিডিওটি ইতিমধ্যে আনলক করা আছে কি না
+    cursor.execute("SELECT * FROM unlocked_videos WHERE user_id = ? AND video_id = ?", (user_id, video_id))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({"status": "success", "message": "Already unlocked"})
+
+    # ইউজারের কয়েন ব্যালেন্স চেক করা
+    cursor.execute("SELECT coins FROM users WHERE user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    coins = user[0] if user else 0
+    
+    if coins > 0:
+        # ১টি কয়েন কেটে নেওয়া এবং ভিডিও আনলক লিস্টে যুক্ত করা
+        cursor.execute("UPDATE users SET coins = coins - 1 WHERE user_id = ?", (user_id,))
+        cursor.execute("INSERT OR IGNORE INTO unlocked_videos (user_id, video_id) VALUES (?, ?)", (user_id, video_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"status": "success", "message": "Unlocked successfully"})
+    else:
+        conn.close()
+        return jsonify({"status": "fail", "message": "Insufficient coins"})
+
 def run_flask():
     port = int(os.environ.get('PORT', 8080))
     flask_app.run(host='0.0.0.0', port=port)
-
-# --- 2. CONFIGURATION ---
-BOT_TOKEN = '8952565156:AAHubKRCMzY6D6_hLcLwvta-3M5Pd_DoF-E'
-STORAGE_CHANNEL_ID = -1004499292164
-MAIN_CHANNEL_USERNAME = '@MYxxxxx9'  # আপনার মূল চ্যানেলের ইউজারনেম
-BOT_USERNAME = 'MySongPremium2026Bot'  # আপনার বটের ইউজারনেম
-WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
-ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেলিগ্রাম আইডি
 
 # Helper function: Decode Safe Base64 Text
 def decode_base64_text(encoded_str):
@@ -107,15 +167,42 @@ def decode_base64_text(encoded_str):
         logger.error(f'Base64 decode error: {e}')
         return 'রিকোয়েস্ট বোঝা যায়নি'
 
-# --- 3. COMMAND HANDLERS ---
+# --- 4. COMMAND HANDLERS ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
+    # প্রতিবার স্টার্ট করলে ইউজারকে ডাটাবেজে রেজিস্টার করা (যদি না থাকে)
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (chat_id,))
+    conn.commit()
+    conn.close()
+
     if context.args:
         arg = context.args[0]
 
-        if arg.startswith('coin_'):
+        # 🌟 রেফারেল লজিক (যেমন: /start ref_123456)
+        if arg.startswith('ref_'):
+            try:
+                referrer_id = int(arg.split('_')[1])
+                if referrer_id != chat_id:  # নিজের লিঙ্কে নিজে ক্লিক রোধ করতে
+                    conn = sqlite3.connect('database.db')
+                    cursor = conn.cursor()
+                    cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (referrer_id,))
+                    cursor.execute("UPDATE users SET coins = coins + 1, referrals = referrals + 1 WHERE user_id = ?", (referrer_id,))
+                    conn.commit()
+                    conn.close()
+            except Exception as e:
+                logger.error(f"Referral processing error: {e}")
+            
+            await update.message.reply_text(
+                "✅ **স্বাগতম!** আপনি সফলভাবে রেফারেল লিংকের মাধ্যমে যুক্ত হয়েছেন।",
+                parse_mode='Markdown'
+            )
+            return
+
+        elif arg.startswith('coin_'):
             parts = arg.split('_')
             if len(parts) >= 3:
                 amount = parts[1]
@@ -188,7 +275,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
                 )
     else:
-        # বটের সাথে চ্যাটে Web App বাটন ব্যবহার করা যাবে
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton(
                 '🚀 Open Mini App', web_app=WebAppInfo(url=WEB_APP_URL)
@@ -226,7 +312,6 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         encoded_t = quote(title, safe='')
         encoded_i = quote(img_url, safe='')
 
-        # পপআপ সমস্যা দূর করার জন্য টেলিগ্রাম মিনি অ্যাপের শর্ট লিংক ব্যবহার করা হলো
         final_mini_app_url = (
             f'https://t.me/{BOT_USERNAME}/viralvideos?v={encoded_v}&t={encoded_t}&img={encoded_i}'
         )
@@ -257,7 +342,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- 4. AUTO VIDEO HANDLER ---
+# --- 5. AUTO VIDEO HANDLER ---
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     if not msg.video and not msg.document:
@@ -339,10 +424,12 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- 5. MAIN FUNCTION ---
+# --- 6. MAIN FUNCTION ---
 def main():
+    # ব্যাকগ্রাউন্ডে Flask সার্ভার রান করানো
     threading.Thread(target=run_flask, daemon=True).start()
 
+    # টেলিগ্রাম বট ইনিশিয়ালাইজেশন
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -351,7 +438,7 @@ def main():
         MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video)
     )
 
-    logger.info('Bot started successfully...')
+    logger.info('Bot and Flask server started successfully...')
     app.run_polling()
 
 if __name__ == '__main__':
