@@ -154,7 +154,7 @@
             white-space: nowrap;
         }
 
-        /* Pink Invite / Referral Banner (Exact as requested) */
+        /* Pink Invite / Referral Banner */
         .invite-banner {
             background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
             border: 1px solid #f472b6;
@@ -251,7 +251,7 @@
             border-color: var(--netflix-red);
         }
 
-        /* Video Feed Elements (Netflix Style) */
+        /* Video Feed Elements */
         .video-card {
             background: var(--bg-card);
             border: 1px solid var(--border-dark);
@@ -561,7 +561,7 @@
         <span class="icon">👤</span>
         <span>প্রোফাইল</span>
     </button>
-    <a href="https://t.me/MySongPremium2026Bot" target="_blank" class="nav-button">
+    <a href="https://t.me/MYxxxxx9" target="_blank" class="nav-button">
         <span class="icon">📢</span>
         <span>চ্যানেল</span>
     </a>
@@ -603,6 +603,7 @@
 
 <script>
     const BOT_USERNAME = "MySongPremium2026Bot";
+    const CHANNEL_LINK = "https://t.me/MYxxxxx9";
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
     const UNLOCK_API_URL = "https://mybot-k94c.onrender.com/api/unlock";
 
@@ -668,13 +669,11 @@
         return `${days} দিন আগে`;
     }
 
-    //প্রতিটি ভিডিওর জন্য আলাদা এবং ইউনিক ভিউয়ার্স জেনারেটর (২০০০ থেকে ৩০০০ এর মধ্যে ভিন্ন ভিন্ন সংখ্যা)
     function getUniqueStats(id) {
         let seed = 0;
         let safeId = String(id || Math.random());
         for (let i = 0; i < safeId.length; i++) { seed += safeId.charCodeAt(i); }
         
-        // ২০০০ থেকে ৩০০০ এর মধ্যে ইউনিক সংখ্যা ক্যালকুলেট করা
         let views = 2000 + (seed % 1001); 
         let formattedViews = views.toLocaleString('bn-BD'); 
         let ratingNum = (4.5 + ((seed % 5) * 0.1)).toFixed(1);
@@ -893,7 +892,9 @@
     }
 
     function shareApp() {
-        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/' + BOT_USERNAME + '/app?startapp=v1')}&text=${encodeURIComponent('🔥 সেরা এক্সক্লুসিভ ভিডিও মিনি অ্যাপটি দেখুন!')}`;
+        let referralLink = `https://t.me/${BOT_USERNAME}?start=ref_${userId}`;
+        const shareText = `🔥 সেরা এক্সক্লুসিভ ভিডিও মিনি অ্যাপটি দেখতে এই লিংকে ক্লিক করুন:\n${referralLink}`;
+        const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('🔥 সেরা এক্সক্লুসিভ ভিডিও মিনি অ্যাপটি দেখুন!')}`;
         window.open(shareUrl, '_blank');
     }
 
