@@ -208,7 +208,7 @@
             box-shadow: 0 0 8px var(--accent-glow);
         }
 
-        /* Video Grid (2 Column with BIGGER Thumbnails) */
+        /* Video Grid (2 Column) */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -226,7 +226,6 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
-        /* Thumbnail Height Increased to 165px for Bigger Look */
         .thumb-container {
             width: 100%;
             height: 165px;
@@ -253,20 +252,22 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
+        /* Compact Eye Icon Views Overlay */
         .fake-views {
             position: absolute;
             bottom: 6px;
-            left: 6px;
             right: 6px;
-            background: rgba(0, 0, 0, 0.82);
-            backdrop-filter: blur(4px);
-            color: #ffd166;
-            font-size: 9px;
-            padding: 3px 6px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(3px);
+            color: #fff;
+            font-size: 9.5px;
+            padding: 2px 6px;
             border-radius: 4px;
             font-weight: 700;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
 
         .card-details {
@@ -467,7 +468,6 @@
     <div class="admin-box">
         <h3>⚙️ এডমিন প্যানেল ও সেটিংস</h3>
 
-        <!-- Leaderboard Visitor Stats -->
         <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:10px;">
             <p style="font-size:11px; color:var(--gold-color);">📊 <strong>আজকের ভিজিটর (লিডারবোর্ড):</strong></p>
             <h2 style="font-size:18px; color:#fff;" id="todayVisitorsCount">154 জন ভিজিট করেছে</h2>
@@ -530,12 +530,12 @@
 
     const fallbackImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80";
 
-    // Demo Videos with Dynamic "আজ দেখেছে এতো জন" text
+    // Demo Videos with distinct varying view counts
     let videoList = [
-        { id: "vid_01", title: "Netflix VIP Special Episode 1 🔥", thumb: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80", category: "vip", todayViews: "১,৫২০" },
-        { id: "vid_02", title: "Trending Dance Mix 💃", thumb: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=500&q=80", category: "dance", todayViews: "২,৪১০" },
-        { id: "vid_03", title: "Exclusive Shorts Reels HD ⚡", thumb: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&q=80", category: "reels", todayViews: "১,৮৯০" },
-        { id: "vid_04", title: "VIP Cinema Super Hit 🍿", thumb: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80", category: "vip", todayViews: "৩,১০০" }
+        { id: "vid_01", title: "Netflix VIP Special Episode 1 🔥", thumb: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80", category: "vip", views: "2.8K" },
+        { id: "vid_02", title: "Trending Dance Mix 💃", thumb: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=500&q=80", category: "dance", views: "1.4K" },
+        { id: "vid_03", title: "Exclusive Shorts Reels HD ⚡", thumb: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&q=80", category: "reels", views: "3.9K" },
+        { id: "vid_04", title: "VIP Cinema Super Hit 🍿", thumb: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80", category: "vip", views: "5.2K" }
     ];
 
     let userCoins = parseInt(localStorage.getItem('user_coins') || "0");
@@ -573,14 +573,14 @@
         list.forEach((vid) => {
             let step = videoProgress[vid.id] || 0;
             let btnText = `দেখুন (${step}/3)`;
-            let fakeViewsText = vid.todayViews ? `🔥 আজ দেখেছে ${vid.todayViews} জন` : "🔥 আজ দেখেছে ১,২৫০ জন";
+            let fakeViewsText = vid.views || "1.2K";
 
             container.innerHTML += `
                 <div class="video-card">
                     <div class="thumb-container">
                         <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
                         <span class="tag-vip">HD VIP</span>
-                        <span class="fake-views">${fakeViewsText}</span>
+                        <span class="fake-views">👁️ ${fakeViewsText}</span>
                     </div>
                     <div class="card-details">
                         <div class="video-title">${vid.title}</div>
@@ -694,7 +694,6 @@
         openAdLink(AD_LINKS[currentStep]);
     }
 
-    // Fixed Coin Unlock Logic
     function useCoinUnlock(vId) {
         if (userCoins >= 1) {
             if (confirm("🪙 ১টি কয়েন ব্যবহার করে ভিডিওটি সরাসরি দেখতে চান?")) {
@@ -715,16 +714,17 @@
         }
     }
 
-    // Fixed Home Button to Open Public Channel
+    // Direct Home Button to Open Channel across all environments
     function openPublicChannel() {
         if (window.Telegram?.WebApp?.openTelegramLink) {
             window.Telegram.WebApp.openTelegramLink(PUBLIC_CHANNEL);
+        } else if (window.Telegram?.WebApp?.openLink) {
+            window.Telegram.WebApp.openLink(PUBLIC_CHANNEL);
         } else {
             window.open(PUBLIC_CHANNEL, '_blank');
         }
     }
 
-    // Referral Share Button (Shares Public Channel Link)
     function shareAppReferral() {
         let shareText = `🔥 বন্ধুদের ইনভাইট করে ১টি প্রিমিয়াম ভিডিও আনলক করুন ফ্রি! আমাদের অফিশিয়াল চ্যানেলে যোগ দিন:\n${PUBLIC_CHANNEL}`;
         let shareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareText)}`;
