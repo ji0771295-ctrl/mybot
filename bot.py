@@ -31,6 +31,9 @@ BOT_USERNAME = 'MySongPremium2026Bot'  # আপনার বটের ইউজ�
 WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গিটহাব পেজের ওয়েবলিংক
 ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেলিগ্রাম আইডি
 
+# --- Global Storage for Custom Thumbnails ---
+user_temp_thumbnails = {}  # ইউজারদের পাঠানো কাস্টম ছবি সাময়িক জমা রাখার জন্য
+
 # --- 1. SQLite Database Setup (Users & Unlocked Videos) ---
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -169,7 +172,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
 
-    # কমন কিবোর্ড (পাবলিক চ্যানেল এবং মিনি অ্যাপ বাটন)
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url='https://t.me/MYxxxxx9')],
         [InlineKeyboardButton('🎬 Netflix Zone মিনি অ্যাপ খুলুন', web_app=WebAppInfo(url=WEB_APP_URL))]
@@ -191,7 +193,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 logger.error(f"Referral processing error: {e}")
             
-            # এখন রেফারেল লিংকে আসলে টেক্সটের সাথে বাটনগুলোও দেখাবে
             await update.message.reply_text(
                 "✅ **স্বাগতম!** আপনি সফলভাবে রেফারেল লিংকের মাধ্যমে যুক্ত হয়েছেন।\n\n"
                 "⚠️ ভিডিও ও আপডেট পেতে প্রথমে আমাদের **পাবলিক চ্যানেলে** জয়েন করুন, তারপর মিনি অ্যাপে প্রবেশ করুন।",
@@ -277,7 +278,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👋 স্বাগতম! আমাদের বটের মাধ্যমে আপনি এক্সক্লুসিভ সব ভিডিও দেখতে পারবেন।\n\n"
             f"⚠️ ভিডিও ও আপডেট পেতে প্রথমে আমাদের **পাবলিক চ্যানেলে** জয়েন করুন, তারপর মিনি অ্যাপে প্রবেশ করুন।"
         )
-        
         await update.message.reply_text(
             welcome_text,
             reply_markup=keyboard,
@@ -339,7 +339,35 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
+# --- নতুন ফটো হ্যান্ডলার (কাস্টম থাম্বনেইল সেট করার জন্য) ---
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    try:
+        photo_file = await update.message.photo[-1].get_file()
+        thumb_path = f'custom_thumb_{user_id}.jpg'
+        await photo_file.download_to_drive(thumb_path)
+
+        # Catbox.moe তে আপলোড করা হচ্ছে
+        with open(thumb_path, 'rb') as f:
+            response = requests.post(
+                'https://catbox.moe/user/api.php',
+                data={'reqtype': 'fileupload'},
+                files={'fileToUpload': f},
+            )
+            if response.status_code == 200 and response.text.startswith('http'):
+                user_temp_thumbnails[user_id] = response.text.strip()
+                await update.message.reply_text("✅ আপনার কাস্টম থাম্বনেইল সফলভাবে সেভ হয়েছে! এবার ভিডিওটি পাঠান।")
+            else:
+                await update.message.reply_text("❌ থাম্বনেইল আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।")
+
+        if os.path.exists(thumb_path):
+            os.remove(thumb_path)
+    except Exception as e:
+        logger.error(f'Error handling custom photo: {e}')
+        await update.message.reply_text("❌ থাম্বনেইল প্রসেস করতে সমস্যা হয়েছে।")
+
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
     msg = update.message
     if not msg.video and not msg.document:
         return
@@ -356,33 +384,39 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         video_msg_id = str(stored_msg.message_id)
 
-        img_url = 'https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png'
-        thumb_obj = None
+        # চেক করা হচ্ছে ইউজারের কোনো কাস্টম থাম্বনেইল দেওয়া আছে কি না
+        if user_id in user_temp_thumbnails:
+            img_url = user_temp_thumbnails[user_id]
+            del user_temp_thumbnails[user_id]  # ব্যবহারের পর মুছে ফেলা হলো
+        else:
+            # কাস্টম না থাকলে ভিডিওর নিজস্ব থাম্বনেইল বা ডিফল্ট ইমেজ ব্যবহার হবে
+            img_url = 'https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png'
+            thumb_obj = None
 
-        if msg.video and msg.video.thumbnail:
-            thumb_obj = msg.video.thumbnail
-        elif msg.document and msg.document.thumbnail:
-            thumb_obj = msg.document.thumbnail
+            if msg.video and msg.video.thumbnail:
+                thumb_obj = msg.video.thumbnail
+            elif msg.document and msg.document.thumbnail:
+                thumb_obj = msg.document.thumbnail
 
-        if thumb_obj:
-            thumb_file = await context.bot.get_file(thumb_obj.file_id)
-            thumb_path = f'thumb_{msg.message_id}.jpg'
-            await thumb_file.download_to_drive(thumb_path)
+            if thumb_obj:
+                thumb_file = await context.bot.get_file(thumb_obj.file_id)
+                thumb_path = f'thumb_{msg.message_id}.jpg'
+                await thumb_file.download_to_drive(thumb_path)
 
-            try:
-                with open(thumb_path, 'rb') as f:
-                    response = requests.post(
-                        'https://catbox.moe/user/api.php',
-                        data={'reqtype': 'fileupload'},
-                        files={'fileToUpload': f},
-                    )
-                    if response.status_code == 200 and response.text.startswith('http'):
-                        img_url = response.text.strip()
-            except Exception as upload_err:
-                logger.error(f'Image upload failed: {upload_err}')
+                try:
+                    with open(thumb_path, 'rb') as f:
+                        response = requests.post(
+                            'https://catbox.moe/user/api.php',
+                            data={'reqtype': 'fileupload'},
+                            files={'fileToUpload': f},
+                        )
+                        if response.status_code == 200 and response.text.startswith('http'):
+                            img_url = response.text.strip()
+                except Exception as upload_err:
+                    logger.error(f'Image upload failed: {upload_err}')
 
-            if os.path.exists(thumb_path):
-                os.remove(thumb_path)
+                if os.path.exists(thumb_path):
+                    os.remove(thumb_path)
 
         title = msg.caption or 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵'
 
@@ -426,6 +460,7 @@ def main():
 
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('post', create_post))
+    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))  # নতুন কাস্টম থাম্বনেইল হ্যান্ডলার
     app.add_handler(
         MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video)
     )
