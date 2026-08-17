@@ -57,21 +57,33 @@ def init_db():
 
 init_db()
 
-# --- 2. JSON Database Persistence (Videos Database) ---
+# --- 2. Telegram Pin-Based Persistence (Auto Backup & Restore) ---
 DB_FILE = "videos_db.json"
 videos_db = []
 
-def load_videos():
+async def load_videos_from_telegram(application: Application):
+    """বট চালুর সময় টেলিগ্রাম চ্যানেলের পিন করা ফাইল থেকে ডাটা লোড করবে"""
     global videos_db
-    if os.path.exists(DB_FILE):
-        try:
-            with open(DB_FILE, "r", encoding="utf-8") as f:
-                videos_db = json.load(f)
-        except Exception as e:
-            logger.error(f"Error loading JSON DB: {e}")
-            videos_db = []
+    try:
+        chat = await application.bot.get_chat(STORAGE_CHANNEL_ID)
+        if chat.pinned_message and chat.pinned_message.document:
+            file = await application.bot.get_file(chat.pinned_message.document.file_id)
+            await file.download_to_drive(DB_FILE)
+            if os.path.exists(DB_FILE):
+                with open(DB_FILE, "r", encoding="utf-8") as f:
+                    videos_db = json.load(f)
+                logger.info("✅ Telegram Pinned Message থেকে ব্যাকআপ ডাটা সফলভাবে লোড হয়েছে!")
+    except Exception as e:
+        logger.error(f"⚠️ Telegram ব্যাকআপ লোড করতে সমস্যা: {e}")
+        if os.path.exists(DB_FILE):
+            try:
+                with open(DB_FILE, "r", encoding="utf-8") as f:
+                    videos_db = json.load(f)
+            except Exception:
+                videos_db = []
 
-def save_video_entry(v_id, title, img_url):
+async def save_and_sync_video(v_id, title, img_url, context):
+    """ভিডিও সেভ করবে এবং প্রাইভেট চ্যানেলে পিন করে রাখবে"""
     global videos_db
     entry = {
         "id": str(v_id),
@@ -82,24 +94,26 @@ def save_video_entry(v_id, title, img_url):
         "timeAgo": "এখনই যুক্ত হয়েছে",
         "todayViews": "১,২০০ জন আজকে দেখেছে 🔥"
     }
-    for v in videos_db:
-        if v['id'] == str(v_id):
-            v['title'] = title
-            v['thumb'] = img_url
-            _write_to_db()
-            return
-            
+    
+    # আগের একই আইডি থাকলে আপডেট করবে, না থাকলে নতুন যুক্ত করবে
+    videos_db = [v for v in videos_db if v['id'] != str(v_id)]
     videos_db.insert(0, entry)
-    _write_to_db()
 
-def _write_to_db():
     try:
+        # ১. লোকাল ফাইলেই রাইট করা
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(videos_db, f, ensure_ascii=False, indent=2)
+            
+        # ২. স্টোরেজ চ্যানেলে ডাটা ফাইল পিন করা (Permanent Auto Backup)
+        with open(DB_FILE, "rb") as f:
+            doc_msg = await context.bot.send_document(
+                chat_id=STORAGE_CHANNEL_ID,
+                document=f,
+                caption="🔄 Auto DB Backup File (Do Not Delete)"
+            )
+            await context.bot.pin_chat_message(chat_id=STORAGE_CHANNEL_ID, message_id=doc_msg.message_id)
     except Exception as e:
-        logger.error(f"Error writing to JSON DB: {e}")
-
-load_videos()
+        logger.error(f"Error syncing backup to Telegram: {e}")
 
 # --- 3. Flask Web Server ---
 flask_app = Flask(__name__)
@@ -173,7 +187,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
 
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url='https://t.me/MYxxxxx9')],
+        [InlineKeyboardButton('📢 প্রথমে আমাদের পাবলিক চ্যানেলে জয়েন করুন', url=f'https://t.me/{MAIN_CHANNEL_USERNAME.replace("@", "")}')],
         [InlineKeyboardButton('🎬 Netflix Zone মিনি অ্যাপ খুলুন', web_app=WebAppInfo(url=WEB_APP_URL))]
     ])
 
@@ -303,7 +317,8 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
 
-        save_video_entry(msg_id, title, img_url)
+        # অটোমেটিক ডাটা সেভ ও টেলিগ্রামে পিন ব্যাকআপ
+        await save_and_sync_video(msg_id, title, img_url, context)
 
         encoded_v = quote(msg_id, safe='')
         encoded_t = quote(title, safe='')
@@ -339,7 +354,7 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- নতুন ফটো হ্যান্ডলার (কাস্টম থাম্বনেইল সেট করার জন্য) ---
+# --- ফটো হ্যান্ডলার (কাস্টম থাম্বনেইল সেভ করার জন্য) ---
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     try:
@@ -356,15 +371,15 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             if response.status_code == 200 and response.text.startswith('http'):
                 user_temp_thumbnails[user_id] = response.text.strip()
-                await update.message.reply_text("✅ আপনার কাস্টম থাম্বনেইল সফলভাবে সেভ হয়েছে! এবার ভিডিওটি পাঠান।")
+                await update.message.reply_text("✅ আপনার কাস্টম থাম্বনেইল সফলভাবে সেভ হয়েছে! এবার ভিডিওটি পাঠান।")
             else:
-                await update.message.reply_text("❌ থাম্বনেইল আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।")
+                await update.message.reply_text("❌ থাম্বনেইল আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।")
 
         if os.path.exists(thumb_path):
             os.remove(thumb_path)
     except Exception as e:
         logger.error(f'Error handling custom photo: {e}')
-        await update.message.reply_text("❌ থাম্বনেইল প্রসেস করতে সমস্যা হয়েছে।")
+        await update.message.reply_text("❌ থাম্বনেইল প্রসেস করতে সমস্যা হয়েছে।")
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -377,19 +392,23 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        stored_msg = await context.bot.copy_message(
-            chat_id=STORAGE_CHANNEL_ID,
-            from_chat_id=msg.chat_id,
-            message_id=msg.message_id,
-        )
-        video_msg_id = str(stored_msg.message_id)
+        # স্টোরেজ চ্যানেল থেকে ফরোয়ার্ড করা ভিডিও হলে আগের আসল মেসেজ আইডি নিবে
+        if msg.forward_from_message_id and msg.forward_from_chat and msg.forward_from_chat.id == STORAGE_CHANNEL_ID:
+            video_msg_id = str(msg.forward_from_message_id)
+        else:
+            # নতুন সরাসরি পাঠানো ভিডিও হলে স্টোরেজ চ্যানেলে কপি করবে
+            stored_msg = await context.bot.copy_message(
+                chat_id=STORAGE_CHANNEL_ID,
+                from_chat_id=msg.chat_id,
+                message_id=msg.message_id,
+            )
+            video_msg_id = str(stored_msg.message_id)
 
-        # চেক করা হচ্ছে ইউজারের কোনো কাস্টম থাম্বনেইল দেওয়া আছে কি না
+        # কাস্টম থাম্বনেইল চেক
         if user_id in user_temp_thumbnails:
             img_url = user_temp_thumbnails[user_id]
-            del user_temp_thumbnails[user_id]  # ব্যবহারের পর মুছে ফেলা হলো
+            del user_temp_thumbnails[user_id]
         else:
-            # কাস্টম না থাকলে ভিডিওর নিজস্ব থাম্বনেইল বা ডিফল্ট ইমেজ ব্যবহার হবে
             img_url = 'https://i.postimg.cc/bvg5CYpW/IMG-20260814-013409-080.png'
             thumb_obj = None
 
@@ -420,7 +439,8 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         title = msg.caption or 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵'
 
-        save_video_entry(video_msg_id, title, img_url)
+        # ব্যাকআপ ডাটা সেভ এবং টেলিগ্রাম চ্যানেলে পিন করা
+        await save_and_sync_video(video_msg_id, title, img_url, context)
 
         encoded_v = quote(video_msg_id, safe='')
         encoded_t = quote(title, safe='')
@@ -450,17 +470,21 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f'Error processing video: {e}')
         await status_msg.edit_text(
-            f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
+            f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`'
         )
+
+async def post_init(application: Application) -> None:
+    """বট চালুর পরপরই টেলিগ্রাম পিন মেসেজ থেকে ব্যাকআপ রিকভার করবে"""
+    await load_videos_from_telegram(application)
 
 def main():
     threading.Thread(target=run_flask, daemon=True).start()
 
-    app = Application.builder().token(BOT_TOKEN).build()
+    app = Application.builder().token(BOT_TOKEN).post_init(post_init).build()
 
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('post', create_post))
-    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))  # নতুন কাস্টম থাম্বনেইল হ্যান্ডলার
+    app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
     app.add_handler(
         MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video)
     )
