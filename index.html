@@ -509,12 +509,13 @@
 </div>
 
 <script>
-    // ⚠️ আপনার টেলিগ্রাম চ্যানেলের লিংক:
     const PUBLIC_CHANNEL = "https://t.me/MYxxxxx9"; 
-    
     const BOT_USERNAME = "MySongPremium2026Bot";
     const ADMIN_TELEGRAM = "https://t.me/ji0771295"; 
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
+
+    // 🔒 গোপন এডমিন পাসওয়ার্ড
+    const ADMIN_PASSWORD = "322281";
 
     const tg = window.Telegram?.WebApp;
     let userId = 8672040646;
@@ -534,7 +535,6 @@
 
     let videoList = [];
 
-    // প্রতিটি ভিডিওতে আলাদা র্যান্ডম ভিউ বসানোর ফাংশন
     function getDistinctViews(index) {
         const viewPresets = ["1.8K", "3.2K", "2.4K", "5.1K", "4.3K", "6.7K", "2.9K", "8.5K", "1.5K", "3.9K"];
         return viewPresets[index % viewPresets.length];
@@ -598,7 +598,7 @@
         });
     }
 
-    // ⚡ ১. অ্যাপ খোলার সাথে সাথে ক্যাশ থেকে ০ সেকেন্ডে ইনস্ট্যান্ট ভিডিও দেখাবে
+    // ⚡ ১. ক্যাশ থেকে ইনস্ট্যান্ট লোড
     let cachedData = localStorage.getItem('app_cached_videos');
     if (cachedData) {
         try {
@@ -619,7 +619,7 @@
         `;
     }
 
-    // ⚡ ২. ব্যাকগ্রাউন্ডে সার্ভার থেকে লাইভ ভিডিও এসে ইনস্ট্যান্ট সেভ ও আপডেট হবে
+    // ⚡ ২. ব্যাকগ্রাউন্ড আপডেট
     async function fetchLiveVideos() {
         try {
             let response = await fetch(API_URL);
@@ -644,7 +644,7 @@
         }
     }
 
-    // Page Visibility Detection (12-Second timer tracking)
+    // Visibility Detection (12-Second timer tracking)
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden && adStartTime > 0 && currentAdTask) {
             let timeSpent = Math.floor((Date.now() - adStartTime) / 1000);
@@ -737,7 +737,6 @@
         }
     }
 
-    // Home Button Redirect Action
     function openPublicChannel() {
         let channelUrl = PUBLIC_CHANNEL.trim();
         if (window.Telegram?.WebApp?.openTelegramLink && channelUrl.startsWith("https://t.me/")) {
@@ -775,16 +774,17 @@
         }
     }
 
+    // 🔒 সুরক্ষিত এডমিন প্যানেল ওপেন ফাংশন
     function openAdminModal() {
-        let pass = prompt("এডমিন পাসওয়ার্ড দিন (ডিফল্ট: 1234):");
-        if (pass === "1234") {
+        let pass = prompt("এডমিন সিকিউরিটি পাসওয়ার্ড দিন:");
+        if (pass === ADMIN_PASSWORD) {
             document.getElementById('ad1_input').value = AD_LINKS[0] || "";
             document.getElementById('ad2_input').value = AD_LINKS[1] || "";
             document.getElementById('ad3_input').value = AD_LINKS[2] || "";
             document.getElementById('notice_input').value = savedNotice;
             document.getElementById('adminModal').style.display = 'block';
         } else if (pass !== null) {
-            alert("❌ ভুল পাসওয়ার্ড!");
+            alert("❌ ভুল পাসওয়ার্ড! প্রবেশ নিষেধ।");
         }
     }
 
