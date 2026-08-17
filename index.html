@@ -12,12 +12,12 @@
             --netflix-dark-red: #B81D24;
             --bg-body: #0a0a0f;
             --bg-card: #14141d;
-            --bg-glass: rgba(20, 20, 29, 0.9);
-            --border-color: #232332;
+            --bg-glass: rgba(20, 20, 29, 0.95);
+            --border-color: #262636;
             --text-white: #ffffff;
             --text-gray: #a0a0ab;
-            --gold-color: #ffb703;
-            --accent-glow: rgba(229, 9, 20, 0.35);
+            --gold-color: #FFD700;
+            --accent-glow: rgba(229, 9, 20, 0.25);
         }
 
         * {
@@ -31,7 +31,7 @@
         body {
             background: var(--bg-body);
             color: var(--text-white);
-            padding-bottom: 85px;
+            padding-bottom: 90px;
             display: flex;
             justify-content: center;
             min-height: 100vh;
@@ -43,18 +43,18 @@
             padding: 10px;
         }
 
-        /* 9. Notice Board */
+        /* Notice Board */
         .notice-board {
-            background: rgba(229, 9, 20, 0.15);
+            background: rgba(229, 9, 20, 0.12);
             border: 1px solid var(--netflix-red);
             color: #fff;
-            padding: 6px 10px;
+            padding: 7px 10px;
             border-radius: 8px;
             font-size: 11px;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            overflow: hidden;
+            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .notice-board marquee {
@@ -71,39 +71,43 @@
             border: 1px solid var(--border-color);
             padding: 10px 12px;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .user-profile {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
         .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
             background: linear-gradient(135deg, var(--netflix-red), #500005);
+            border: 1px solid rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 800;
+            font-weight: 900;
             color: #fff;
-            font-size: 15px;
+            font-size: 16px;
         }
 
-        .user-info h2 { font-size: 13px; font-weight: 700; }
-        .user-info p { font-size: 9px; color: var(--netflix-red); font-weight: 800; }
+        .user-info h2 { font-size: 13px; font-weight: 700; color: #fff; }
+        .user-info p { font-size: 9px; color: var(--netflix-red); font-weight: 800; letter-spacing: 0.5px; }
 
         .wallet-badge {
-            background: rgba(255, 183, 3, 0.1);
+            background: rgba(255, 215, 0, 0.12);
             border: 1px solid var(--gold-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-weight: 800;
             font-size: 11px;
             color: var(--gold-color);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
         }
 
         /* Instruction Box */
@@ -111,43 +115,61 @@
             background: linear-gradient(135deg, #1c131d 0%, #111118 100%);
             border-left: 4px solid var(--netflix-red);
             border-radius: 10px;
-            padding: 10px;
+            padding: 10px 12px;
             margin-bottom: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        .instruction-box h3 { font-size: 11.5px; color: #fff; margin-bottom: 4px; }
-        .instruction-box p { font-size: 10px; color: var(--text-gray); line-height: 1.3; }
+        .instruction-box h3 { font-size: 12px; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+        .instruction-box p { font-size: 10.5px; color: var(--text-gray); line-height: 1.4; }
 
-        /* 6. Daily Reward & Ad Coin System */
-        .reward-strip {
-            background: linear-gradient(90deg, #1f1807 0%, #14141d 100%);
-            border: 1px solid rgba(255, 183, 3, 0.3);
+        /* Referral Banner */
+        .referral-box {
+            background: linear-gradient(135deg, #1a1608 0%, #14141d 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-left: 4px solid var(--gold-color);
             border-radius: 10px;
-            padding: 8px 10px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .referral-box h3 { font-size: 11.5px; color: var(--gold-color); margin-bottom: 2px; }
+        .referral-box p { font-size: 9.5px; color: #d0d0d8; }
+
+        /* Daily Reward Strip */
+        .reward-strip {
+            background: linear-gradient(90deg, #1c131d 0%, #14141d 100%);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            border-radius: 10px;
+            padding: 9px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .reward-info h4 { font-size: 11px; color: #fff; }
-        .reward-info p { font-size: 9px; color: var(--text-gray); }
+        .reward-info p { font-size: 9.5px; color: var(--text-gray); }
 
         .mini-btn {
-            background: var(--gold-color);
+            background: linear-gradient(135deg, var(--gold-color), #e6a100);
             color: #000;
             border: none;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
             font-weight: 800;
-            font-size: 10.5px;
+            font-size: 11px;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
         /* Search & Categories */
         .search-box input {
             width: 100%;
-            padding: 8px 10px;
+            padding: 9px 12px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -171,8 +193,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             color: var(--text-gray);
-            padding: 5px 12px;
-            border-radius: 15px;
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 10.5px;
             font-weight: 700;
             cursor: pointer;
@@ -183,28 +205,31 @@
             background: var(--netflix-red);
             color: #fff;
             border-color: var(--netflix-red);
+            box-shadow: 0 0 8px var(--accent-glow);
         }
 
-        /* Video Grid (2 Column) */
+        /* Video Grid (2 Column with BIGGER Thumbnails) */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
 
         .video-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
+        /* Thumbnail Height Increased to 165px for Bigger Look */
         .thumb-container {
             width: 100%;
-            height: 115px;
+            height: 165px;
             position: relative;
             background: #000;
         }
@@ -217,31 +242,35 @@
 
         .tag-vip {
             position: absolute;
-            top: 5px;
-            left: 5px;
+            top: 6px;
+            left: 6px;
             background: var(--netflix-red);
             color: #fff;
-            font-size: 8px;
+            font-size: 8.5px;
             font-weight: 900;
-            padding: 2px 5px;
-            border-radius: 3px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* 2. Fake Views Display */
         .fake-views {
             position: absolute;
-            bottom: 5px;
-            right: 5px;
-            background: rgba(0,0,0,0.75);
-            color: #e0e0e0;
-            font-size: 8.5px;
-            padding: 2px 5px;
+            bottom: 6px;
+            left: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(4px);
+            color: #ffd166;
+            font-size: 9px;
+            padding: 3px 6px;
             border-radius: 4px;
-            font-weight: 600;
+            font-weight: 700;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card-details {
-            padding: 8px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -253,7 +282,7 @@
             font-weight: 700;
             color: #fff;
             line-height: 1.3;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -262,7 +291,7 @@
 
         .card-actions {
             display: flex;
-            gap: 4px;
+            gap: 5px;
             margin-top: 4px;
         }
 
@@ -271,24 +300,25 @@
             background: linear-gradient(135deg, var(--netflix-red), var(--netflix-dark-red));
             color: #fff;
             border: none;
-            padding: 6px 2px;
+            padding: 7px 2px;
             border-radius: 6px;
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 800;
             cursor: pointer;
             text-align: center;
+            box-shadow: 0 2px 6px rgba(229, 9, 20, 0.3);
         }
 
         .action-icon {
-            width: 26px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.05);
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
+            font-size: 12px;
             cursor: pointer;
             color: #fff;
         }
@@ -302,40 +332,7 @@
             min-height: 12px;
         }
 
-        /* 10. Live Countdown Modal Overlay */
-        .timer-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 999;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .timer-circle {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            border: 4px solid var(--netflix-red);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 900;
-            color: #fff;
-            margin-bottom: 15px;
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        .timer-modal h3 { font-size: 16px; margin-bottom: 6px; }
-        .timer-modal p { font-size: 12px; color: var(--text-gray); margin-bottom: 15px; }
-
-        /* Admin Settings Modal (1 & 3) */
+        /* Admin Settings Modal */
         .admin-modal {
             display: none;
             position: fixed;
@@ -375,7 +372,7 @@
             transform: translateX(-50%);
             width: 100%;
             max-width: 450px;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(10, 10, 15, 0.96);
             backdrop-filter: blur(10px);
             border-top: 1px solid var(--border-color);
             display: flex;
@@ -398,14 +395,14 @@
         }
 
         .nav-item.active { color: var(--netflix-red); }
-        .nav-item span { font-size: 15px; margin-bottom: 2px; }
+        .nav-item span { font-size: 16px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
 
-    <!-- 9. Scroll Notice Board -->
+    <!-- Scroll Notice Board -->
     <div class="notice-board">
         <marquee id="noticeText">📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানেলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!</marquee>
     </div>
@@ -427,10 +424,19 @@
     <!-- Instruction Box -->
     <div class="instruction-box">
         <h3>🎬 ভিডিও দেখার নিয়মাবলী</h3>
-        <p>যেকোনো ভিডিওর <strong>"দেখুন"</strong> বাটনে চাপ দিয়ে এড ভিজিট করুন এবং <strong>১২ সেকেন্ড</strong> অপেক্ষা করুন। ৩টি এড দেখলেই বটে ভিডিও যাবে!</p>
+        <p>যেকোনো ভিডিওর <strong>"দেখুন"</strong> বাটনে চাপ দিয়ে এড ভিজিট করুন এবং <strong>১২ সেকেন্ড</strong> থাকুন। এডে ১২ সেকেন্ড না থাকলে ভিডিও আনলক হবে না!</p>
     </div>
 
-    <!-- 6. Daily Free Coin Reward Strip -->
+    <!-- Referral Invite Section -->
+    <div class="referral-box">
+        <div>
+            <h3>🎁 বন্ধুদের ইনভাইট করুন</h3>
+            <p>বন্ধুদের ইনভাইট করে ১টি প্রিমিয়াম ভিডিও আনলক করুন ফ্রি!</p>
+        </div>
+        <button class="mini-btn" style="white-space: nowrap;" onclick="shareAppReferral()">রেফার করুন</button>
+    </div>
+
+    <!-- Daily Free Coin Reward Strip -->
     <div class="reward-strip">
         <div class="reward-info">
             <h4>ফ্রি কয়েন রিওয়ার্ড 🎁</h4>
@@ -456,26 +462,17 @@
     <div class="video-grid" id="videoFeedContainer"></div>
 </div>
 
-<!-- 10. Live 12-Second Countdown Modal -->
-<div class="timer-modal" id="timerModal">
-    <div class="timer-circle" id="timerCount">12</div>
-    <h3>⏳ এডের পেজে অপেক্ষা করুন</h3>
-    <p>ভিডিও সফলভাবে আনলক করতে ১২ সেকেন্ড অপেক্ষা করুন...</p>
-    <button class="mini-btn" style="background:#444; color:#fff;" onclick="cancelTimer()">বন্ধ করুন</button>
-</div>
-
-<!-- 1 & 3. Admin Settings & Leaderboard Modal -->
+<!-- Admin Settings & Leaderboard Modal -->
 <div class="admin-modal" id="adminModal">
     <div class="admin-box">
         <h3>⚙️ এডমিন প্যানেল ও সেটিংস</h3>
 
-        <!-- 3. Leaderboard Visitor Stats -->
+        <!-- Leaderboard Visitor Stats -->
         <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:10px;">
             <p style="font-size:11px; color:var(--gold-color);">📊 <strong>আজকের ভিজিটর (লিডারবোর্ড):</strong></p>
             <h2 style="font-size:18px; color:#fff;" id="todayVisitorsCount">154 জন ভিজিট করেছে</h2>
         </div>
 
-        <!-- 1. Ad Link Change Options -->
         <label>এড লিংক ১:</label>
         <input type="text" id="ad1_input">
 
@@ -485,7 +482,6 @@
         <label>এড লিংক ৩:</label>
         <input type="text" id="ad3_input">
 
-        <!-- 9. Notice Text Edit -->
         <label>নোটিশ টেক্সট চেঞ্জ করুন:</label>
         <input type="text" id="notice_input">
 
@@ -496,19 +492,16 @@
 
 <!-- Bottom Navigation -->
 <div class="bottom-nav">
-    <!-- 4. Home Button redirects to Public Telegram Channel -->
     <button class="nav-item active" onclick="openPublicChannel()">
         <span>⚡</span>
         <div>হোম</div>
     </button>
 
-    <!-- 5. Referral Shares Public Telegram Channel -->
     <button class="nav-item" onclick="shareAppReferral()">
         <span>🎁</span>
         <div>রেফার</div>
     </button>
 
-    <!-- 8. Admin Support Direct Link -->
     <button class="nav-item" onclick="openAdminSupport()">
         <span>💬</span>
         <div>সাপোর্ট</div>
@@ -517,8 +510,8 @@
 
 <script>
     const BOT_USERNAME = "MySongPremium2026Bot";
-    const PUBLIC_CHANNEL = "https://t.me/MYxxxxx9"; // 4, 5, 7. Public Channel Link
-    const ADMIN_TELEGRAM = "https://t.me/ji0771295"; // 8. Admin Direct Link
+    const PUBLIC_CHANNEL = "https://t.me/MYxxxxx9"; 
+    const ADMIN_TELEGRAM = "https://t.me/ji0771295"; 
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
 
     const tg = window.Telegram?.WebApp;
@@ -537,19 +530,17 @@
 
     const fallbackImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80";
 
-    // 2. Videos with Fake Views (2000, 2500 views, etc.)
+    // Demo Videos with Dynamic "আজ দেখেছে এতো জন" text
     let videoList = [
-        { id: "vid_01", title: "Netflix VIP Special Episode 1 🔥", thumb: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80", category: "vip", views: "2.5K" },
-        { id: "vid_02", title: "Trending Dance Mix 💃", thumb: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=500&q=80", category: "dance", views: "1.9K" },
-        { id: "vid_03", title: "Exclusive Shorts Reels HD ⚡", thumb: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&q=80", category: "reels", views: "2.1K" },
-        { id: "vid_04", title: "VIP Cinema Super Hit 🍿", thumb: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80", category: "vip", views: "2.8K" }
+        { id: "vid_01", title: "Netflix VIP Special Episode 1 🔥", thumb: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80", category: "vip", todayViews: "১,৫২০" },
+        { id: "vid_02", title: "Trending Dance Mix 💃", thumb: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=500&q=80", category: "dance", todayViews: "২,৪১০" },
+        { id: "vid_03", title: "Exclusive Shorts Reels HD ⚡", thumb: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&q=80", category: "reels", todayViews: "১,৮৯০" },
+        { id: "vid_04", title: "VIP Cinema Super Hit 🍿", thumb: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80", category: "vip", todayViews: "৩,১০০" }
     ];
 
-    // User Coin System
     let userCoins = parseInt(localStorage.getItem('user_coins') || "0");
     document.getElementById('coinDisplay').innerText = userCoins;
 
-    // Default Ads
     let defaultAds = [
         "https://www.effectivecpmnetwork.com/jw6f2542?key=be9b19eb6446684b83c7c176c2e6eff6",
         "https://www.effectivecpmnetwork.com/db1i2ymy4?key=7d652bbed150823806f251b23de82443",
@@ -560,17 +551,15 @@
     let savedNotice = localStorage.getItem('admin_notice_text') || "📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!";
     document.getElementById('noticeText').innerText = savedNotice;
 
-    // Leaderboard/Visitor Counter Logic
-    let totalVisits = parseInt(localStorage.getItem('admin_visitor_count') || "142") + 1;
+    let totalVisits = parseInt(localStorage.getItem('admin_visitor_count') || "154") + 1;
     localStorage.setItem('admin_visitor_count', totalVisits.toString());
     document.getElementById('todayVisitorsCount').innerText = `${totalVisits} জন আজ মিনি এপে এসেছে`;
 
     let videoProgress = {};
-    let activeVidId = null;
-    let isDailyTaskActive = false;
     let dailyStep = 0;
-    let timerInterval = null;
-    let countdownSec = 12;
+
+    let adStartTime = 0;
+    let currentAdTask = null;
 
     function renderVideos(list) {
         const container = document.getElementById('videoFeedContainer');
@@ -581,18 +570,17 @@
             return;
         }
 
-        list.forEach((vid, idx) => {
+        list.forEach((vid) => {
             let step = videoProgress[vid.id] || 0;
             let btnText = `দেখুন (${step}/3)`;
-            let fakeViews = vid.views || `${(2.0 + (idx * 0.3)).toFixed(1)}K`;
+            let fakeViewsText = vid.todayViews ? `🔥 আজ দেখেছে ${vid.todayViews} জন` : "🔥 আজ দেখেছে ১,২৫০ জন";
 
             container.innerHTML += `
                 <div class="video-card">
                     <div class="thumb-container">
                         <img src="${vid.thumb}" onerror="this.onerror=null;this.src='${fallbackImage}';" alt="Thumbnail">
                         <span class="tag-vip">HD VIP</span>
-                        <!-- 2. Fake Views badge -->
-                        <span class="fake-views">👁️ ${fakeViews}</span>
+                        <span class="fake-views">${fakeViewsText}</span>
                     </div>
                     <div class="card-details">
                         <div class="video-title">${vid.title}</div>
@@ -600,8 +588,7 @@
                         <div class="card-actions">
                             <button id="btn_${vid.id}" class="action-unlock" onclick="handleVideoClick('${vid.id}')">${btnText}</button>
                             <button class="action-icon" title="কয়েন দিয়ে দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
-                            <!-- 7. Video Share Button -->
-                            <button class="action-icon" title="চ্যানেল শেয়ার করুন" onclick="shareVideo('${vid.id}')">🔗</button>
+                            <button class="action-icon" title="শেয়ার করুন" onclick="shareVideo('${vid.id}')">🔗</button>
                         </div>
                     </div>
                 </div>
@@ -626,6 +613,7 @@
     fetchLiveVideos();
 
     function openAdLink(url) {
+        adStartTime = Date.now();
         if (window.Telegram?.WebApp?.openLink) {
             window.Telegram.WebApp.openLink(url);
         } else {
@@ -633,32 +621,60 @@
         }
     }
 
-    // 10. Live 12-Second Visual Timer Logic
-    function start12SecTimer(onCompleteCallback) {
-        countdownSec = 12;
-        document.getElementById('timerCount').innerText = countdownSec;
-        document.getElementById('timerModal').style.display = 'flex';
+    // Page Visibility Detection (12-Second timer tracking)
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden && adStartTime > 0 && currentAdTask) {
+            let timeSpent = Math.floor((Date.now() - adStartTime) / 1000);
+            adStartTime = 0;
 
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            countdownSec--;
-            document.getElementById('timerCount').innerText = countdownSec;
+            if (timeSpent >= 12) {
+                if (currentAdTask.type === 'video') {
+                    let vId = currentAdTask.vId;
+                    let currentStep = (videoProgress[vId] || 0) + 1;
+                    let statusEl = document.getElementById(`status_${vId}`);
+                    let btnEl = document.getElementById(`btn_${vId}`);
 
-            if (countdownSec <= 0) {
-                clearInterval(timerInterval);
-                document.getElementById('timerModal').style.display = 'none';
-                onCompleteCallback();
+                    if (currentStep < 3) {
+                        videoProgress[vId] = currentStep;
+                        if(btnEl) btnEl.innerText = `দেখুন (${currentStep}/3)`;
+                        if(statusEl) statusEl.innerText = `✅ এড ${currentStep}/3 সফল!`;
+                        alert(`✅ ধন্যবাদ! আপনি ${timeSpent} সেকেন্ড এডে ছিলেন। এড (${currentStep}/3) সফল হয়েছে!`);
+                    } else {
+                        videoProgress[vId] = 0;
+                        if(btnEl) btnEl.innerText = `দেখুন (0/3)`;
+                        if(statusEl) statusEl.innerText = `🎉 বটে পাঠানো হচ্ছে...`;
+                        alert(`🎉 আপনি ${timeSpent} সেকেন্ড এডে ছিলেন! ৩টি এড সম্পূর্ণ হয়েছে, বটে ভিডিও পাঠানো হচ্ছে...`);
+                        
+                        let botLink = `https://t.me/${BOT_USERNAME}?start=${vId}`;
+                        if (window.Telegram?.WebApp?.openTelegramLink) {
+                            window.Telegram.WebApp.openTelegramLink(botLink);
+                        } else {
+                            window.location.href = botLink;
+                        }
+                    }
+                } else if (currentAdTask.type === 'daily') {
+                    dailyStep++;
+                    if (dailyStep < 3) {
+                        document.getElementById('dailyBannerSub').innerText = `✅ এড (${dailyStep}/3) শেষ! পরবর্তী এডে চাপুন।`;
+                        alert(`✅ ধন্যবাদ! আপনি ${timeSpent} সেকেন্ড এডে ছিলেন। এড (${dailyStep}/3) গণনা করা হয়েছে!`);
+                    } else {
+                        userCoins += 1;
+                        localStorage.setItem('user_coins', userCoins.toString());
+                        localStorage.setItem('last_claim_date', new Date().toDateString());
+                        document.getElementById('coinDisplay').innerText = userCoins;
+                        document.getElementById('claimBtn').innerText = "সম্পন্ন ✅";
+                        document.getElementById('dailyBannerSub').innerText = "🎉 ১টি ফ্রি কয়েন পেয়েছেন!";
+                        alert("🎉 অভিনন্দন! ৩টি এড সফলভাবে দেখায় ১টি ফ্রি কয়েন যোগ হয়েছে!");
+                        dailyStep = 0;
+                    }
+                }
+            } else {
+                alert(`⚠️ আপনি মাত্র ${timeSpent} সেকেন্ড এডে ছিলেন! আনলক করতে অন্তত ১২ সেকেন্ড এডে থাকতে হবে।`);
             }
-        }, 1000);
-    }
+            currentAdTask = null;
+        }
+    });
 
-    function cancelTimer() {
-        clearInterval(timerInterval);
-        document.getElementById('timerModal').style.display = 'none';
-        alert("⚠️ ১২ সেকেন্ড শেষ না করায় এড গণনা করা হয়নি!");
-    }
-
-    // 6. Free Coin System
     function handleDailyAdBonus() {
         let lastClaim = localStorage.getItem('last_claim_date');
         let today = new Date().toDateString();
@@ -668,87 +684,75 @@
             return;
         }
 
+        currentAdTask = { type: 'daily' };
         openAdLink(AD_LINKS[dailyStep]);
-
-        start12SecTimer(() => {
-            dailyStep++;
-            if (dailyStep < 3) {
-                document.getElementById('dailyBannerSub').innerText = `✅ এড (${dailyStep}/3) শেষ! পরবর্তী এডে চাপুন।`;
-                alert(`✅ এড (${dailyStep}/3) সফল! পরবর্তী এড দেখুন।`);
-            } else {
-                userCoins += 1;
-                localStorage.setItem('user_coins', userCoins.toString());
-                localStorage.setItem('last_claim_date', new Date().toDateString());
-                document.getElementById('coinDisplay').innerText = userCoins;
-                document.getElementById('claimBtn').innerText = "সম্পন্ন ✅";
-                document.getElementById('dailyBannerSub').innerText = "🎉 ১টি ফ্রি কয়েন পেয়েছেন!";
-                alert("🎉 অভিনন্দন! ১টি ফ্রি কয়েন সফলভাবে যোগ হয়েছে!");
-                dailyStep = 0;
-            }
-        });
     }
 
     function handleVideoClick(vId) {
         let currentStep = videoProgress[vId] || 0;
+        currentAdTask = { type: 'video', vId: vId };
         openAdLink(AD_LINKS[currentStep]);
-
-        start12SecTimer(() => {
-            currentStep++;
-            let statusEl = document.getElementById(`status_${vId}`);
-            let btnEl = document.getElementById(`btn_${vId}`);
-
-            if (currentStep < 3) {
-                videoProgress[vId] = currentStep;
-                if(btnEl) btnEl.innerText = `দেখুন (${currentStep}/3)`;
-                if(statusEl) statusEl.innerText = `✅ এড ${currentStep}/3 সফল!`;
-            } else {
-                videoProgress[vId] = 0;
-                if(btnEl) btnEl.innerText = `দেখুন (0/3)`;
-                if(statusEl) statusEl.innerText = `🎉 বটে পাঠানো হচ্ছে...`;
-                setTimeout(() => {
-                    window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
-                }, 500);
-            }
-        });
     }
 
-    // 6. Use 1 Coin to Unlock Video directly
+    // Fixed Coin Unlock Logic
     function useCoinUnlock(vId) {
-        if (confirm("🪙 ১টি কয়েন ব্যবহার করে ভিডিওটি সরাসরি দেখতে চান?")) {
-            if (userCoins > 0) {
-                userCoins--;
+        if (userCoins >= 1) {
+            if (confirm("🪙 ১টি কয়েন ব্যবহার করে ভিডিওটি সরাসরি দেখতে চান?")) {
+                userCoins -= 1;
                 localStorage.setItem('user_coins', userCoins.toString());
                 document.getElementById('coinDisplay').innerText = userCoins;
-                window.location.href = `https://t.me/${BOT_USERNAME}?start=${vId}`;
-            } else {
-                alert("❌ আপনার কাছে পর্যাপ্ত কয়েন নেই! ৩টি এড দেখে ফ্রি কয়েন অর্জন করুন।");
+                alert("🎉 কয়েন ব্যবহার সফল হয়েছে! বটে ভিডিও পাঠানো হচ্ছে...");
+                
+                let botLink = `https://t.me/${BOT_USERNAME}?start=${vId}`;
+                if (window.Telegram?.WebApp?.openTelegramLink) {
+                    window.Telegram.WebApp.openTelegramLink(botLink);
+                } else {
+                    window.location.href = botLink;
+                }
             }
+        } else {
+            alert("❌ আপনার কাছে পর্যাপ্ত কয়েন নেই! ফ্রি কয়েন আর্ন করতে 'এড দেখুন' বাটনে চাপ দিন।");
         }
     }
 
-    // 4. Home Button Action
+    // Fixed Home Button to Open Public Channel
     function openPublicChannel() {
-        window.open(PUBLIC_CHANNEL, '_blank');
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(PUBLIC_CHANNEL);
+        } else {
+            window.open(PUBLIC_CHANNEL, '_blank');
+        }
     }
 
-    // 5. Share Channel Referral Action
+    // Referral Share Button (Shares Public Channel Link)
     function shareAppReferral() {
-        let shareText = `🔥 ফ্রি ভিডিও দেখতে এবং আনলক করতে আমাদের চ্যানেল জয়েন করুন:\n${PUBLIC_CHANNEL}`;
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(shareText)}`, '_blank');
+        let shareText = `🔥 বন্ধুদের ইনভাইট করে ১টি প্রিমিয়াম ভিডিও আনলক করুন ফ্রি! আমাদের অফিশিয়াল চ্যানেলে যোগ দিন:\n${PUBLIC_CHANNEL}`;
+        let shareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareText)}`;
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(shareUrl);
+        } else {
+            window.open(shareUrl, '_blank');
+        }
     }
 
-    // 7. Video Share Action
     function shareVideo(vId) {
-        let shareText = `🎬 দারুণ এই VIP ভিডিওটি চ্যানেল থেকে দেখুন:\n${PUBLIC_CHANNEL}`;
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(shareText)}`, '_blank');
+        let shareText = `🎬 দারুণ এই VIP ভিডিওটি দেখতে চ্যানেলে যোগ দিন:\n${PUBLIC_CHANNEL}`;
+        let shareUrl = `https://t.me/share/url?url=${encodeURIComponent(shareText)}`;
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(shareUrl);
+        } else {
+            window.open(shareUrl, '_blank');
+        }
     }
 
-    // 8. Admin Support Direct Link
     function openAdminSupport() {
-        window.open(ADMIN_TELEGRAM, '_blank');
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(ADMIN_TELEGRAM);
+        } else {
+            window.open(ADMIN_TELEGRAM, '_blank');
+        }
     }
 
-    // 1. Admin Settings Modal Logic
     function openAdminModal() {
         let pass = prompt("এডমিন পাসওয়ার্ড দিন (ডিফল্ট: 1234):");
         if (pass === "1234") {
