@@ -62,7 +62,7 @@ DB_FILE = "videos_db.json"
 videos_db = []
 
 async def load_videos_from_telegram(application: Application):
-    """বট চালুর সময় টেলিগ্রাম চ্যানেলের পিন করা ফাইল থেকে ডাটা লোড করবে"""
+    """বট চালুর সময় টেলিগ্রাম চ্যানেলের পিন করা ফাইল থেকে ডাটা লোড করবে"""
     global videos_db
     try:
         chat = await application.bot.get_chat(STORAGE_CHANNEL_ID)
@@ -392,11 +392,24 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     try:
-        # স্টোরেজ চ্যানেল থেকে ফরোয়ার্ড করা ভিডিও হলে আগের আসল মেসেজ আইডি নিবে
-        if msg.forward_from_message_id and msg.forward_from_chat and msg.forward_from_chat.id == STORAGE_CHANNEL_ID:
-            video_msg_id = str(msg.forward_from_message_id)
+        # ফরোয়ার্ড করা মেসেজের আইডি নিরাপদে বের করার চেষ্টা
+        forward_msg_id = None
+        forward_chat_id = None
+
+        if hasattr(msg, 'forward_origin') and msg.forward_origin:
+            forward_msg_id = getattr(msg.forward_origin, 'message_id', None)
+            if hasattr(msg.forward_origin, 'chat'):
+                forward_chat_id = getattr(msg.forward_origin.chat, 'id', None)
+        elif hasattr(msg, 'forward_from_message_id'):
+            forward_msg_id = getattr(msg, 'forward_from_message_id', None)
+            if hasattr(msg, 'forward_from_chat') and msg.forward_from_chat:
+                forward_chat_id = msg.forward_from_chat.id
+
+        # স্টোরেজ চ্যানেল থেকে ফরোয়ার্ড করা ভিডিও হলে আগের আসল আইডি নিবে
+        if forward_msg_id and forward_chat_id == STORAGE_CHANNEL_ID:
+            video_msg_id = str(forward_msg_id)
         else:
-            # নতুন সরাসরি পাঠানো ভিডিও হলে স্টোরেজ চ্যানেলে কপি করবে
+            # নতুন ভিডিও হলে স্টোরেজ চ্যানেলে কপি করবে
             stored_msg = await context.bot.copy_message(
                 chat_id=STORAGE_CHANNEL_ID,
                 from_chat_id=msg.chat_id,
