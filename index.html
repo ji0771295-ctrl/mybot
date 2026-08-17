@@ -228,7 +228,7 @@
 
         .thumb-container {
             width: 100%;
-            height: 165px;
+            height: 160px;
             position: relative;
             background: #000;
         }
@@ -252,19 +252,19 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Compact Eye Icon Views Overlay */
+        /* Eye Icon Views Overlay */
         .fake-views {
             position: absolute;
             bottom: 6px;
             right: 6px;
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(3px);
             color: #fff;
             font-size: 9.5px;
-            padding: 2px 6px;
+            padding: 3px 6px;
             border-radius: 4px;
             font-weight: 700;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             gap: 3px;
@@ -509,8 +509,10 @@
 </div>
 
 <script>
-    const BOT_USERNAME = "MySongPremium2026Bot";
+    // ⚠️ আপনার টেলিগ্রাম চ্যানেলের লিংক:
     const PUBLIC_CHANNEL = "https://t.me/MYxxxxx9"; 
+    
+    const BOT_USERNAME = "MySongPremium2026Bot";
     const ADMIN_TELEGRAM = "https://t.me/ji0771295"; 
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
 
@@ -530,13 +532,13 @@
 
     const fallbackImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80";
 
-    // Demo Videos with distinct varying view counts
-    let videoList = [
-        { id: "vid_01", title: "Netflix VIP Special Episode 1 🔥", thumb: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&q=80", category: "vip", views: "2.8K" },
-        { id: "vid_02", title: "Trending Dance Mix 💃", thumb: "https://images.unsplash.com/photo-1547153760-18fc86324498?w=500&q=80", category: "dance", views: "1.4K" },
-        { id: "vid_03", title: "Exclusive Shorts Reels HD ⚡", thumb: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&q=80", category: "reels", views: "3.9K" },
-        { id: "vid_04", title: "VIP Cinema Super Hit 🍿", thumb: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=500&q=80", category: "vip", views: "5.2K" }
-    ];
+    let videoList = [];
+
+    // প্রতিটি ভিডিওতে আলাদা র্যান্ডম ভিউ বসানোর ফাংশন
+    function getDistinctViews(index) {
+        const viewPresets = ["1.8K", "3.2K", "2.4K", "5.1K", "4.3K", "6.7K", "2.9K", "8.5K", "1.5K", "3.9K"];
+        return viewPresets[index % viewPresets.length];
+    }
 
     let userCoins = parseInt(localStorage.getItem('user_coins') || "0");
     document.getElementById('coinDisplay').innerText = userCoins;
@@ -570,10 +572,10 @@
             return;
         }
 
-        list.forEach((vid) => {
+        list.forEach((vid, idx) => {
             let step = videoProgress[vid.id] || 0;
             let btnText = `দেখুন (${step}/3)`;
-            let fakeViewsText = vid.views || "1.2K";
+            let fakeViewsText = getDistinctViews(idx);
 
             container.innerHTML += `
                 <div class="video-card">
@@ -596,18 +598,39 @@
         });
     }
 
-    renderVideos(videoList);
+    // ⚡ ১. অ্যাপ খোলার সাথে সাথে ক্যাশ থেকে ০ সেকেন্ডে ইনস্ট্যান্ট ভিডিও দেখাবে
+    let cachedData = localStorage.getItem('app_cached_videos');
+    if (cachedData) {
+        try {
+            videoList = JSON.parse(cachedData);
+            renderVideos(videoList);
+        } catch(e) {
+            showInitialLoading();
+        }
+    } else {
+        showInitialLoading();
+    }
 
+    function showInitialLoading() {
+        document.getElementById('videoFeedContainer').innerHTML = `
+            <p style="grid-column: span 2; text-align:center; color:#FFD700; padding:30px 10px; font-size:12px; font-weight:bold;">
+                ⏳ প্রথমবার ভিডিও লোড হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...
+            </p>
+        `;
+    }
+
+    // ⚡ ২. ব্যাকগ্রাউন্ডে সার্ভার থেকে লাইভ ভিডিও এসে ইনস্ট্যান্ট সেভ ও আপডেট হবে
     async function fetchLiveVideos() {
         try {
             let response = await fetch(API_URL);
             let liveData = await response.json();
             if (liveData && liveData.length > 0) {
                 videoList = liveData;
+                localStorage.setItem('app_cached_videos', JSON.stringify(liveData));
                 renderVideos(videoList);
             }
         } catch (e) {
-            console.log("Local video mode active");
+            console.log("Showing cached videos mode");
         }
     }
     fetchLiveVideos();
@@ -714,14 +737,13 @@
         }
     }
 
-    // Direct Home Button to Open Channel across all environments
+    // Home Button Redirect Action
     function openPublicChannel() {
-        if (window.Telegram?.WebApp?.openTelegramLink) {
-            window.Telegram.WebApp.openTelegramLink(PUBLIC_CHANNEL);
-        } else if (window.Telegram?.WebApp?.openLink) {
-            window.Telegram.WebApp.openLink(PUBLIC_CHANNEL);
+        let channelUrl = PUBLIC_CHANNEL.trim();
+        if (window.Telegram?.WebApp?.openTelegramLink && channelUrl.startsWith("https://t.me/")) {
+            window.Telegram.WebApp.openTelegramLink(channelUrl);
         } else {
-            window.open(PUBLIC_CHANNEL, '_blank');
+            window.open(channelUrl, '_blank');
         }
     }
 
