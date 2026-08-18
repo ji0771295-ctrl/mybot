@@ -32,11 +32,15 @@ WEB_APP_URL = 'https://ji0771295-ctrl.github.io/mybot'  # আপনার গি
 ADMIN_ID = 8672040646  # আপনার পার্সোনাল টেলিগ্রাম আইডি
 
 # --- Global Storage for Custom Thumbnails ---
-user_temp_thumbnails = {}  # ইউজারদের পাঠানো কাস্টম ছবি সাময়িক জমা রাখার জন্য
+user_temp_thumbnails = {}
 
-# --- 1. SQLite Database Setup (Users & Unlocked Videos) ---
+# --- Helper function for SQLite connections ---
+def get_db():
+    return sqlite3.connect('database.db', timeout=10)
+
+# --- 1. SQLite Database Setup ---
 def init_db():
-    conn = sqlite3.connect('database.db')
+    conn = get_db()
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -57,12 +61,11 @@ def init_db():
 
 init_db()
 
-# --- 2. Telegram Pin-Based Persistence (Auto Backup & Restore) ---
+# --- 2. Telegram Pin-Based Persistence ---
 DB_FILE = "videos_db.json"
 videos_db = []
 
 async def load_videos_from_telegram(application: Application):
-    """বট চালুর সময় টেলিগ্রাম চ্যানেলের পিন করা ফাইল থেকে ডাটা লোড করবে"""
     global videos_db
     try:
         chat = await application.bot.get_chat(STORAGE_CHANNEL_ID)
@@ -83,7 +86,6 @@ async def load_videos_from_telegram(application: Application):
                 videos_db = []
 
 async def save_and_sync_video(v_id, title, img_url, context):
-    """ভিডিও সেভ করবে এবং প্রাইভেট চ্যানেলে পিন করে রাখবে"""
     global videos_db
     entry = {
         "id": str(v_id),
@@ -95,16 +97,13 @@ async def save_and_sync_video(v_id, title, img_url, context):
         "todayViews": "১,২০০ জন আজকে দেখেছে 🔥"
     }
     
-    # আগের একই আইডি থাকলে আপডেট করবে, না থাকলে নতুন যুক্ত করবে
     videos_db = [v for v in videos_db if v['id'] != str(v_id)]
     videos_db.insert(0, entry)
 
     try:
-        # ১. লোকাল ফাইলেই রাইট করা
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump(videos_db, f, ensure_ascii=False, indent=2)
             
-        # ২. স্টোরেজ চ্যানেলে ডাটা ফাইল পিন করা (Permanent Auto Backup)
         with open(DB_FILE, "rb") as f:
             doc_msg = await context.bot.send_document(
                 chat_id=STORAGE_CHANNEL_ID,
@@ -128,22 +127,32 @@ def get_videos():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@flask_app.route('/api/unlock', methods=['POST'])
+@flask_app.route('/api/unlock', methods=['POST', 'OPTIONS'])
 def unlock_video():
-    data = request.json
+    if request.method == 'OPTIONS':
+        response = jsonify({"status": "ok"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+        return response, 200
+
+    data = request.json or {}
     user_id = data.get('user_id')
     video_id = data.get('video_id')
     
     if not user_id or not video_id:
-        return jsonify({"status": "error", "message": "Invalid data"}), 400
+        res = jsonify({"status": "error", "message": "Invalid data"})
+        res.headers.add('Access-Control-Allow-Origin', '*')
+        return res, 400
 
-    conn = sqlite3.connect('database.db')
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM unlocked_videos WHERE user_id = ? AND video_id = ?", (user_id, video_id))
     if cursor.fetchone():
         conn.close()
-        return jsonify({"status": "success", "message": "Already unlocked"})
+        res = jsonify({"status": "success", "message": "Already unlocked"})
+        res.headers.add('Access-Control-Allow-Origin', '*')
+        return res
 
     cursor.execute("SELECT coins FROM users WHERE user_id = ?", (user_id,))
     user = cursor.fetchone()
@@ -154,10 +163,13 @@ def unlock_video():
         cursor.execute("INSERT OR IGNORE INTO unlocked_videos (user_id, video_id) VALUES (?, ?)", (user_id, video_id))
         conn.commit()
         conn.close()
-        return jsonify({"status": "success", "message": "Unlocked successfully"})
+        res = jsonify({"status": "success", "message": "Unlocked successfully"})
     else:
         conn.close()
-        return jsonify({"status": "fail", "message": "Insufficient coins"})
+        res = jsonify({"status": "fail", "message": "Insufficient coins"})
+
+    res.headers.add('Access-Control-Allow-Origin', '*')
+    return res
 
 def run_flask():
     port = int(os.environ.get('PORT', 8080))
@@ -165,9 +177,7 @@ def run_flask():
 
 def decode_base64_text(encoded_str):
     try:
-        padding = (
-            '=' * (4 - len(encoded_str) % 4) if len(encoded_str) % 4 != 0 else ''
-        )
+        padding = '=' * (4 - len(encoded_str) % 4) if len(encoded_str) % 4 != 0 else ''
         clean_str = encoded_str.replace('-', '+').replace('_', '/') + padding
         decoded_bytes = base64.b64decode(clean_str)
         return decoded_bytes.decode('utf-8')
@@ -180,7 +190,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
-    conn = sqlite3.connect('database.db')
+    conn = get_db()
     cursor = conn.cursor()
     cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (chat_id,))
     conn.commit()
@@ -198,7 +208,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 referrer_id = int(arg.split('_')[1])
                 if referrer_id != chat_id:
-                    conn = sqlite3.connect('database.db')
+                    conn = get_db()
                     cursor = conn.cursor()
                     cursor.execute("INSERT OR IGNORE INTO users (user_id, coins, referrals) VALUES (?, 0, 0)", (referrer_id,))
                     cursor.execute("UPDATE users SET coins = coins + 1, referrals = referrals + 1 WHERE user_id = ?", (referrer_id,))
@@ -272,21 +282,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         else:
-            video_msg_id = arg
-            try:
-                await update.message.reply_text(
-                    '⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...'
-                )
-                await context.bot.copy_message(
-                    chat_id=chat_id,
-                    from_chat_id=STORAGE_CHANNEL_ID,
-                    message_id=int(video_msg_id),
-                )
-            except Exception as e:
-                logger.error(f'Error sending video: {e}')
-                await update.message.reply_text(
-                    '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
-                )
+            # ভিডিও আইডি ফিল্টার ও এক্সট্র্যাক্ট করা
+            clean_arg = ''.join(filter(str.isdigit, arg))
+            if clean_arg:
+                video_msg_id = int(clean_arg)
+                try:
+                    await update.message.reply_text('⏳ আপনার ভিডিও ফাইলটি পাঠানো হচ্ছে, ১ সেকেন্ড অপেক্ষা করুন...')
+                    await context.bot.copy_message(
+                        chat_id=chat_id,
+                        from_chat_id=STORAGE_CHANNEL_ID,
+                        message_id=video_msg_id,
+                    )
+                except Exception as e:
+                    logger.error(f'Error sending video: {e}')
+                    await update.message.reply_text(
+                        '❌ দুঃখিত, ভিডিওটি পাওয়া যায়নি বা স্টোরেজ চ্যানেল থেকে মুছে ফেলা হয়েছে।'
+                    )
+            else:
+                await update.message.reply_text('❌ ভুল আইডি বা রিকোয়েস্ট লিঙ্ক।')
     else:
         welcome_text = (
             f"👋 স্বাগতম! আমাদের বটের মাধ্যমে আপনি এক্সক্লুসিভ সব ভিডিও দেখতে পারবেন।\n\n"
@@ -317,7 +330,6 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         msg_id, title, img_url = parts[0], parts[1], parts[2]
 
-        # অটোমেটিক ডাটা সেভ ও টেলিগ্রামে পিন ব্যাকআপ
         await save_and_sync_video(msg_id, title, img_url, context)
 
         encoded_v = quote(msg_id, safe='')
@@ -325,21 +337,17 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
         encoded_i = quote(img_url, safe='')
 
         final_mini_app_url = (
-            f'https://t.me/{BOT_USERNAME}/viralvideos?v={encoded_v}&t={encoded_t}&img={encoded_i}'
+            f'https://t.me/{BOT_USERNAME}/viralvideos?startapp=v_{encoded_v}&t={encoded_t}&img={encoded_i}'
         )
 
         keyboard = InlineKeyboardMarkup([[
-            InlineKeyboardButton(
-                '🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url
-            )
+            InlineKeyboardButton('🎬 Watch Video (Mini App) 🎬', url=final_mini_app_url)
         ]])
 
         await context.bot.send_photo(
             chat_id=MAIN_CHANNEL_USERNAME,
             photo=img_url,
-            caption=(
-                f'🎬 **{title}**\n\nনিচের বাটনে চাপ দিয়ে সরাসরি ভিডিওটি দেখুন:'
-            ),
+            caption=f'🎬 **{title}**\n\nনিচের বাটনে চাপ দিয়ে সরাসরি ভিডিওটি দেখুন:',
             reply_markup=keyboard,
             parse_mode='Markdown',
         )
@@ -354,15 +362,14 @@ async def create_post(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'❌ পোস্ট তৈরি করতে সমস্যা হয়েছে: `{str(e)}`', parse_mode='Markdown'
         )
 
-# --- ফটো হ্যান্ডলার (কাস্টম থাম্বনেইল সেভ করার জন্য) ---
+# --- ফটো হ্যান্ডলার ---
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    thumb_path = f'custom_thumb_{user_id}.jpg'
     try:
         photo_file = await update.message.photo[-1].get_file()
-        thumb_path = f'custom_thumb_{user_id}.jpg'
         await photo_file.download_to_drive(thumb_path)
 
-        # Catbox.moe তে আপলোড করা হচ্ছে
         with open(thumb_path, 'rb') as f:
             response = requests.post(
                 'https://catbox.moe/user/api.php',
@@ -374,12 +381,12 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text("✅ আপনার কাস্টম থাম্বনেইল সফলভাবে সেভ হয়েছে! এবার ভিডিওটি পাঠান।")
             else:
                 await update.message.reply_text("❌ থাম্বনেইল আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।")
-
-        if os.path.exists(thumb_path):
-            os.remove(thumb_path)
     except Exception as e:
         logger.error(f'Error handling custom photo: {e}')
         await update.message.reply_text("❌ থাম্বনেইল প্রসেস করতে সমস্যা হয়েছে।")
+    finally:
+        if os.path.exists(thumb_path):
+            os.remove(thumb_path)
 
 async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -387,29 +394,24 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg.video and not msg.document:
         return
 
-    status_msg = await msg.reply_text(
-        '⏳ ভিডিও স্টোরেজে পাঠানো ও প্রসেসিং হচ্ছে...'
-    )
+    status_msg = await msg.reply_text('⏳ ভিডিও স্টোরেজে পাঠানো ও প্রসেসিং হচ্ছে...')
 
     try:
-        # ফরোয়ার্ড করা মেসেজের আইডি নিরাপদে বের করার চেষ্টা
         forward_msg_id = None
         forward_chat_id = None
 
         if hasattr(msg, 'forward_origin') and msg.forward_origin:
             forward_msg_id = getattr(msg.forward_origin, 'message_id', None)
-            if hasattr(msg.forward_origin, 'chat'):
+            if getattr(msg.forward_origin, 'type', None) == 'channel':
                 forward_chat_id = getattr(msg.forward_origin.chat, 'id', None)
         elif hasattr(msg, 'forward_from_message_id'):
             forward_msg_id = getattr(msg, 'forward_from_message_id', None)
             if hasattr(msg, 'forward_from_chat') and msg.forward_from_chat:
                 forward_chat_id = msg.forward_from_chat.id
 
-        # স্টোরেজ চ্যানেল থেকে ফরোয়ার্ড করা ভিডিও হলে আগের আসল আইডি নিবে
         if forward_msg_id and forward_chat_id == STORAGE_CHANNEL_ID:
             video_msg_id = str(forward_msg_id)
         else:
-            # নতুন ভিডিও হলে স্টোরেজ চ্যানেলে কপি করবে
             stored_msg = await context.bot.copy_message(
                 chat_id=STORAGE_CHANNEL_ID,
                 from_chat_id=msg.chat_id,
@@ -417,7 +419,6 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             video_msg_id = str(stored_msg.message_id)
 
-        # কাস্টম থাম্বনেইল চেক
         if user_id in user_temp_thumbnails:
             img_url = user_temp_thumbnails[user_id]
             del user_temp_thumbnails[user_id]
@@ -433,9 +434,8 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if thumb_obj:
                 thumb_file = await context.bot.get_file(thumb_obj.file_id)
                 thumb_path = f'thumb_{msg.message_id}.jpg'
-                await thumb_file.download_to_drive(thumb_path)
-
                 try:
+                    await thumb_file.download_to_drive(thumb_path)
                     with open(thumb_path, 'rb') as f:
                         response = requests.post(
                             'https://catbox.moe/user/api.php',
@@ -446,22 +446,19 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             img_url = response.text.strip()
                 except Exception as upload_err:
                     logger.error(f'Image upload failed: {upload_err}')
-
-                if os.path.exists(thumb_path):
-                    os.remove(thumb_path)
+                finally:
+                    if os.path.exists(thumb_path):
+                        os.remove(thumb_path)
 
         title = msg.caption or 'নতুন এক্সক্লুসিভ মিউজিক ভিডিও 🎵'
 
-        # ব্যাকআপ ডাটা সেভ এবং টেলিগ্রাম চ্যানেলে পিন করা
         await save_and_sync_video(video_msg_id, title, img_url, context)
 
         encoded_v = quote(video_msg_id, safe='')
         encoded_t = quote(title, safe='')
         encoded_i = quote(img_url, safe='')
 
-        mini_app_link = (
-            f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
-        )
+        mini_app_link = f'{WEB_APP_URL}?v={encoded_v}&t={encoded_t}&img={encoded_i}'
 
         keyboard = InlineKeyboardMarkup([[
             InlineKeyboardButton('🎬 Open Mini App Test', web_app=WebAppInfo(url=mini_app_link))
@@ -476,18 +473,13 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f'`/post {video_msg_id} | {title} | {img_url}`'
         )
 
-        await status_msg.edit_text(
-            reply_text, parse_mode='Markdown', reply_markup=keyboard
-        )
+        await status_msg.edit_text(reply_text, parse_mode='Markdown', reply_markup=keyboard)
 
     except Exception as e:
         logger.error(f'Error processing video: {e}')
-        await status_msg.edit_text(
-            f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`'
-        )
+        await status_msg.edit_text(f'❌ ভিডিও প্রসেস করতে সমস্যা হয়েছে: `{str(e)}`')
 
 async def post_init(application: Application) -> None:
-    """বট চালুর পরপরই টেলিগ্রাম পিন মেসেজ থেকে ব্যাকআপ রিকভার করবে"""
     await load_videos_from_telegram(application)
 
 def main():
@@ -498,9 +490,7 @@ def main():
     app.add_handler(CommandHandler('start', start))
     app.add_handler(CommandHandler('post', create_post))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
-    app.add_handler(
-        MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video)
-    )
+    app.add_handler(MessageHandler(filters.VIDEO | filters.Document.ALL, handle_video))
 
     logger.info('Bot and Flask server started successfully...')
     app.run_polling()
