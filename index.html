@@ -48,7 +48,7 @@
             background: rgba(229, 9, 20, 0.12);
             border: 1px solid var(--netflix-red);
             color: #fff;
-            padding: 7px 10px;
+            padding: 8px 10px;
             border-radius: 8px;
             font-size: 11px;
             margin-bottom: 10px;
@@ -169,12 +169,12 @@
         /* Search & Categories */
         .search-box input {
             width: 100%;
-            padding: 9px 12px;
+            padding: 10px 12px;
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: #fff;
-            font-size: 11px;
+            font-size: 12px;
             outline: none;
             margin-bottom: 10px;
         }
@@ -228,7 +228,7 @@
 
         .thumb-container {
             width: 100%;
-            height: 160px;
+            height: 220px;
             position: relative;
             background: #000;
         }
@@ -237,37 +237,39 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
         }
 
         .tag-vip {
             position: absolute;
-            top: 6px;
-            left: 6px;
+            top: 8px;
+            left: 8px;
             background: var(--netflix-red);
             color: #fff;
-            font-size: 8.5px;
+            font-size: 9px;
             font-weight: 900;
-            padding: 3px 6px;
+            padding: 4px 8px;
             border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            z-index: 2;
         }
 
-        /* Eye Icon Views Overlay */
         .fake-views {
             position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(3px);
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
             color: #fff;
-            font-size: 9.5px;
-            padding: 3px 6px;
+            font-size: 10px;
+            padding: 4px 8px;
             border-radius: 4px;
             font-weight: 700;
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
+            z-index: 2;
         }
 
         .card-details {
@@ -279,10 +281,10 @@
         }
 
         .video-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             color: #fff;
-            line-height: 1.3;
+            line-height: 1.4;
             margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -293,7 +295,7 @@
         .card-actions {
             display: flex;
             gap: 5px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         .action-unlock {
@@ -301,31 +303,32 @@
             background: linear-gradient(135deg, var(--netflix-red), var(--netflix-dark-red));
             color: #fff;
             border: none;
-            padding: 7px 2px;
+            padding: 8px 4px;
             border-radius: 6px;
-            font-size: 10.5px;
+            font-size: 11px;
             font-weight: 800;
             cursor: pointer;
             text-align: center;
             box-shadow: 0 2px 6px rgba(229, 9, 20, 0.3);
+            transition: background 0.3s ease;
         }
 
         .action-icon {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             color: #fff;
         }
 
         .status-text {
-            font-size: 9px;
+            font-size: 9.5px;
             color: var(--gold-color);
             font-weight: 700;
             text-align: center;
@@ -405,7 +408,7 @@
 
     <!-- Scroll Notice Board -->
     <div class="notice-board">
-        <marquee id="noticeText">📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানেলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!</marquee>
+        <marquee id="noticeText">📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানেলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!</marquee>
     </div>
 
     <!-- Header Bar -->
@@ -424,8 +427,8 @@
 
     <!-- Instruction Box -->
     <div class="instruction-box">
-        <h3>🎬 ভিডিও দেখার নিয়মাবলী</h3>
-        <p>যেকোনো ভিডিওর <strong>"দেখুন"</strong> বাটনে চাপ দিয়ে এড ভিজিট করুন এবং <strong>১২ সেকেন্ড</strong> থাকুন। এডে ১২ সেকেন্ড না থাকলে ভিডিও আনলক হবে না!</p>
+        <h3>🎬 ভিডিও দেখার নিয়মাবলী</h3>
+        <p>যেকোনো ভিডিওর <strong>"দেখুন"</strong> বাটনে চাপ দিয়ে এড ভিজিট করুন এবং <strong>১২ সেকেন্ড</strong> থাকুন। এডে ১২ সেকেন্ড না থাকলে ভিডিও আনলক হবে না!</p>
     </div>
 
     <!-- Referral Invite Section -->
@@ -514,7 +517,7 @@
     const ADMIN_TELEGRAM = "https://t.me/ji0771295"; 
     const API_URL = "https://mybot-k94c.onrender.com/api/videos";
 
-    // 🔒 গোপন এডমিন পাসওয়ার্ড
+    // 🔒 গোপন এডমিন পাসওয়ার্ড
     const ADMIN_PASSWORD = "322281";
 
     const tg = window.Telegram?.WebApp;
@@ -550,7 +553,7 @@
     ];
 
     let AD_LINKS = JSON.parse(localStorage.getItem('admin_ad_links')) || defaultAds;
-    let savedNotice = localStorage.getItem('admin_notice_text') || "📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!";
+    let savedNotice = localStorage.getItem('admin_notice_text') || "📢 স্বাগতম! ৩টি এড দেখলে ১টি ফ্রি কয়েন পাবেন। চ্যানেলে যুক্ত থাকতে নিচে হোম বাটনে চাপ দিন!";
     document.getElementById('noticeText').innerText = savedNotice;
 
     let totalVisits = parseInt(localStorage.getItem('admin_visitor_count') || "154") + 1;
@@ -568,13 +571,15 @@
         container.innerHTML = "";
 
         if (!list || list.length === 0) {
-            container.innerHTML = `<p style="grid-column: span 2; text-align:center; color:var(--text-gray); padding:20px; font-size:11px;">কোনো ভিডিও পাওয়া যায়নি!</p>`;
+            container.innerHTML = `<p style="grid-column: span 2; text-align:center; color:var(--text-gray); padding:20px; font-size:11px;">কোনো ভিডিও পাওয়া যায়নি!</p>`;
             return;
         }
 
         list.forEach((vid, idx) => {
             let step = videoProgress[vid.id] || 0;
-            let btnText = `দেখুন (${step}/3)`;
+            let btnText = step >= 3 ? `🚀 বটে ভিডিও দেখুন` : `দেখুন (${step}/3)`;
+            let btnStyle = step >= 3 ? `style="background: linear-gradient(135deg, #28a745, #1e7e34);"` : ``;
+            let statusMsg = step >= 3 ? `🎉 আনলক হয়েছে! নিচের বাটনে চাপ দিন।` : ``;
             let fakeViewsText = getDistinctViews(idx);
 
             container.innerHTML += `
@@ -586,11 +591,11 @@
                     </div>
                     <div class="card-details">
                         <div class="video-title">${vid.title}</div>
-                        <div id="status_${vid.id}" class="status-text"></div>
+                        <div id="status_${vid.id}" class="status-text">${statusMsg}</div>
                         <div class="card-actions">
-                            <button id="btn_${vid.id}" class="action-unlock" onclick="handleVideoClick('${vid.id}')">${btnText}</button>
-                            <button class="action-icon" title="কয়েন দিয়ে দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
-                            <button class="action-icon" title="শেয়ার করুন" onclick="shareVideo('${vid.id}')">🔗</button>
+                            <button id="btn_${vid.id}" class="action-unlock" ${btnStyle} onclick="handleVideoClick('${vid.id}')">${btnText}</button>
+                            <button class="action-icon" title="কয়েন দিয়ে দেখুন" onclick="useCoinUnlock('${vid.id}')">🪙</button>
+                            <button class="action-icon" title="শেয়ার করুন" onclick="shareVideo('${vid.id}')">🔗</button>
                         </div>
                     </div>
                 </div>
@@ -644,7 +649,30 @@
         }
     }
 
-    // Visibility Detection (12-Second timer tracking)
+    // বটে পাঠাবার জন্য সরাসরি ক্লিক হ্যান্ডলার
+    function sendToBot(videoId) {
+        let botLink = `https://t.me/${BOT_USERNAME}?start=${videoId}`;
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+            window.Telegram.WebApp.openTelegramLink(botLink);
+        } else {
+            window.location.href = botLink;
+        }
+    }
+
+    // ১. ভিডিও বাটন ক্লিক হ্যান্ডলার (৩টি এড শেষ হলে সরাসরি বটে নিয়ে যাবে)
+    function handleVideoClick(vId) {
+        let currentStep = videoProgress[vId] || 0;
+        
+        if (currentStep >= 3) {
+            sendToBot(vId);
+            return;
+        }
+
+        currentAdTask = { type: 'video', vId: vId };
+        openAdLink(AD_LINKS[currentStep]);
+    }
+
+    // ২. Visibility Detection (12-Second timer tracking)
     document.addEventListener("visibilitychange", function() {
         if (!document.hidden && adStartTime > 0 && currentAdTask) {
             let timeSpent = Math.floor((Date.now() - adStartTime) / 1000);
@@ -661,25 +689,19 @@
                         videoProgress[vId] = currentStep;
                         if(btnEl) btnEl.innerText = `দেখুন (${currentStep}/3)`;
                         if(statusEl) statusEl.innerText = `✅ এড ${currentStep}/3 সফল!`;
-                        alert(`✅ ধন্যবাদ! আপনি ${timeSpent} সেকেন্ড এডে ছিলেন। এড (${currentStep}/3) সফল হয়েছে!`);
                     } else {
-                        videoProgress[vId] = 0;
-                        if(btnEl) btnEl.innerText = `দেখুন (0/3)`;
-                        if(statusEl) statusEl.innerText = `🎉 বটে পাঠানো হচ্ছে...`;
-                        alert(`🎉 আপনি ${timeSpent} সেকেন্ড এডে ছিলেন! ৩টি এড সম্পূর্ণ হয়েছে, বটে ভিডিও পাঠানো হচ্ছে...`);
-                        
-                        let botLink = `https://t.me/${BOT_USERNAME}?start=${vId}`;
-                        if (window.Telegram?.WebApp?.openTelegramLink) {
-                            window.Telegram.WebApp.openTelegramLink(botLink);
-                        } else {
-                            window.location.href = botLink;
+                        // ৩টি এড সম্পন্ন হলে বাটনটি সবুজ হয়ে আনলক হবে
+                        videoProgress[vId] = 3;
+                        if(btnEl) {
+                            btnEl.innerText = `🚀 বটে ভিডিও দেখুন`;
+                            btnEl.style.background = `linear-gradient(135deg, #28a745, #1e7e34)`;
                         }
+                        if(statusEl) statusEl.innerText = `🎉 আনলক হয়েছে! নিচের বাটনে চাপ দিন।`;
                     }
                 } else if (currentAdTask.type === 'daily') {
                     dailyStep++;
                     if (dailyStep < 3) {
                         document.getElementById('dailyBannerSub').innerText = `✅ এড (${dailyStep}/3) শেষ! পরবর্তী এডে চাপুন।`;
-                        alert(`✅ ধন্যবাদ! আপনি ${timeSpent} সেকেন্ড এডে ছিলেন। এড (${dailyStep}/3) গণনা করা হয়েছে!`);
                     } else {
                         userCoins += 1;
                         localStorage.setItem('user_coins', userCoins.toString());
@@ -687,7 +709,6 @@
                         document.getElementById('coinDisplay').innerText = userCoins;
                         document.getElementById('claimBtn').innerText = "সম্পন্ন ✅";
                         document.getElementById('dailyBannerSub').innerText = "🎉 ১টি ফ্রি কয়েন পেয়েছেন!";
-                        alert("🎉 অভিনন্দন! ৩টি এড সফলভাবে দেখায় ১টি ফ্রি কয়েন যোগ হয়েছে!");
                         dailyStep = 0;
                     }
                 }
@@ -711,29 +732,16 @@
         openAdLink(AD_LINKS[dailyStep]);
     }
 
-    function handleVideoClick(vId) {
-        let currentStep = videoProgress[vId] || 0;
-        currentAdTask = { type: 'video', vId: vId };
-        openAdLink(AD_LINKS[currentStep]);
-    }
-
     function useCoinUnlock(vId) {
         if (userCoins >= 1) {
             if (confirm("🪙 ১টি কয়েন ব্যবহার করে ভিডিওটি সরাসরি দেখতে চান?")) {
                 userCoins -= 1;
                 localStorage.setItem('user_coins', userCoins.toString());
                 document.getElementById('coinDisplay').innerText = userCoins;
-                alert("🎉 কয়েন ব্যবহার সফল হয়েছে! বটে ভিডিও পাঠানো হচ্ছে...");
-                
-                let botLink = `https://t.me/${BOT_USERNAME}?start=${vId}`;
-                if (window.Telegram?.WebApp?.openTelegramLink) {
-                    window.Telegram.WebApp.openTelegramLink(botLink);
-                } else {
-                    window.location.href = botLink;
-                }
+                sendToBot(vId);
             }
         } else {
-            alert("❌ আপনার কাছে পর্যাপ্ত কয়েন নেই! ফ্রি কয়েন আর্ন করতে 'এড দেখুন' বাটনে চাপ দিন।");
+            alert("❌ আপনার কাছে পর্যাপ্ত কয়েন নেই! ফ্রি কয়েন আর্ন করতে 'এড দেখুন' বাটনে চাপ দিন।");
         }
     }
 
@@ -784,7 +792,7 @@
             document.getElementById('notice_input').value = savedNotice;
             document.getElementById('adminModal').style.display = 'block';
         } else if (pass !== null) {
-            alert("❌ ভুল পাসওয়ার্ড! প্রবেশ নিষেধ।");
+            alert("❌ ভুল পাসওয়ার্ড! প্রবেশ নিষেধ।");
         }
     }
 
@@ -809,7 +817,7 @@
             document.getElementById('noticeText').innerText = savedNotice;
         }
 
-        alert("✅ এডমিন সেটিংস সফলভাবে সেভ হয়েছে!");
+        alert("✅ এডমিন সেটিংস সফলভাবে সেভ হয়েছে!");
         closeAdminModal();
     }
 
